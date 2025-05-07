@@ -1,7 +1,20 @@
-﻿services:
+﻿version: '3.9'
+
+services:
+  
   library.api:
     image: library.api
+    container_name: Library.Api
     build:
       context: .
       dockerfile: Library.Api/Dockerfile
-
+      
+  db:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: mssql-db
+    ports:
+      - "1433:1433"
+    environment:
+      SA_PASSWORD: "PA55W0RD!"
+      ACCEPT_EULA: "Y"
+    

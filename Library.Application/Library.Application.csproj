@@ -6,4 +6,13 @@
         <Nullable>enable</Nullable>
     </PropertyGroup>
 
+    <ItemGroup>
+      <Folder Include="Services\Contracts\" />
+      <Folder Include="Services\Implementations\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\Library.Data\Library.Data.csproj" />
+    </ItemGroup>
+
 </Project>
