@@ -20,6 +20,14 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
         return result;
     }
 
+    public override async Task<IEnumerable<Book>> GetAllAsync(CancellationToken token = default)
+    {
+        return await DataContext.Books
+            .Include(x => x.Author)
+            .Include(x => x.UserBooks)
+            .ToListAsync(token);
+    }
+
     public async Task<Book?> GetByIsbnAsync(string isbn, CancellationToken token = default)
     {
         var result = await DataContext.Books

@@ -10,9 +10,13 @@ public class AuthorRepository : GenericRepository<Author>, IAuthorRepository
     {
     }
 
-    public Task<IEnumerable<Book>> GetAllBooksAsync(Guid id, CancellationToken token = default)
+    public async Task<IEnumerable<Book>> GetAllBooksAsync(Guid authorId, CancellationToken token = default)
     {
-        throw new NotImplementedException();
+        return await DataContext.Books
+            .Include(x => x.Author)
+            .Include(x => x.UserBooks)
+            .Where(x => x.Author.Id == authorId)
+            .ToListAsync(token);
     }
     
     public override async Task<Author?> GetByIdAsync(Guid id, CancellationToken token = default)
