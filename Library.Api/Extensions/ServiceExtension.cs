@@ -1,9 +1,13 @@
+using Library.Application.Services.Contracts;
+using Library.Application.Services.Implementations;
+using Library.Contracts;
 using Library.Data;
 using Library.Data.DbStartup;
 using Library.Data.Models;
 using Library.Data.Repositories.Contracts;
 using Library.Data.Repositories.Implementations;
 using Library.Data.UnitOfWork;
+using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -48,7 +52,8 @@ public static class ServiceExtension
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services)
     {
-        // TODO: Add services
+        services.AddSingleton<IAuthorService, AuthorService>();
+        services.AddSingleton<IBookService, BookService>();
         
         return services;
     }
@@ -78,6 +83,16 @@ public static class ServiceExtension
         services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
         services.AddScoped<IAuthorRepository, AuthorRepository>();
         services.AddScoped<IBookRepository, BookRepository>();
+
+        return services;
+    }
+
+    public static IServiceCollection ConfigureMapster(this IServiceCollection services)
+    {
+        // Register Mapster
+        var typeAdapterConfig = TypeAdapterConfig.GlobalSettings;
+        var applicationAssembly = typeof(BaseDto<,>).Assembly;
+        typeAdapterConfig.Scan(applicationAssembly);
 
         return services;
     }

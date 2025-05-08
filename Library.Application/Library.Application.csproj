@@ -7,12 +7,15 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="Services\Contracts\" />
-      <Folder Include="Services\Implementations\" />
+      <ProjectReference Include="..\Library.Data\Library.Data.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <ProjectReference Include="..\Library.Data\Library.Data.csproj" />
+      <PackageReference Include="Mapster" Version="7.4.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <Folder Include="Infrastructure\Mapster\" />
     </ItemGroup>
 
 </Project>

@@ -15,7 +15,8 @@ public class Program
         builder.Services
             .ConfigureServices()
             .ConfigureRepositories()
-            .ConfigureIdentityCore();
+            .ConfigureIdentityCore()
+            .ConfigureMapster();
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
