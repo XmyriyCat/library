@@ -12,12 +12,18 @@ public class Program
         builder.Services.AddAuthorization();
 
         builder.Services.ConfigureMsSqlContext(builder.Configuration);
+        builder.Services
+            .ConfigureServices()
+            .ConfigureRepositories()
+            .ConfigureIdentityCore();
+
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
 
         var app = builder.Build();
 
         await app.MigrateDbAsync();
+        await app.InitializeDbAsync();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
