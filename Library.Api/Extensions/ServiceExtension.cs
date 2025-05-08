@@ -21,4 +21,11 @@ public static class ServiceExtension
     
         await context!.Database.MigrateAsync();
     }
+
+    public static IServiceCollection ConfigureServices(IServiceCollection services)
+    {
+        services.AddScoped<IdentityDataContext>();
+        
+        return  services;
+    }
 }

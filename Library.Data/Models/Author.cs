@@ -1,5 +1,3 @@
-using System;
-
 namespace Library.Data.Models;
 
 public class Author
@@ -11,4 +9,6 @@ public class Author
     public string Country { get; set; }
 
     public DateTime DateOfBirth { get; set; }
+    
+    public virtual ICollection<Book> Books { get; set; } = new  List<Book>();
 }

@@ -346,7 +346,7 @@ namespace Library.Data.Migrations
             modelBuilder.Entity("Library.Data.Models.Book", b =>
                 {
                     b.HasOne("Library.Data.Models.Author", "Author")
-                        .WithMany()
+                        .WithMany("Books")
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -437,6 +437,11 @@ namespace Library.Data.Migrations
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Library.Data.Models.Author", b =>
+                {
+                    b.Navigation("Books");
                 });
 
             modelBuilder.Entity("Library.Data.Models.Book", b =>
