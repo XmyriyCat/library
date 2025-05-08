@@ -1,3 +1,6 @@
+using System;
+using System.Collections.Generic;
+
 namespace Library.Data.Models;
 
 public class Book

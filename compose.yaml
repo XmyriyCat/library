@@ -1,20 +1,26 @@
-﻿version: '3.9'
-
 services:
   
-  library.api:
-    image: library.api
-    container_name: Library.Api
-    build:
-      context: .
-      dockerfile: Library.Api/Dockerfile
-      
+  #  library.api:
+  #    image: library.api
+  #    container_name: Library.Api
+  #    build:
+  #      context: .
+  #      dockerfile: Library.Api/Dockerfile
+  
   db:
     image: mcr.microsoft.com/mssql/server:latest
     container_name: mssql-db
     ports:
       - "1433:1433"
     environment:
-      SA_PASSWORD: "PA55W0RD!"
       ACCEPT_EULA: "Y"
-    
+      SA_PASSWORD: "DB_Password"
+    networks:
+      - dev_network
+    volumes:
+      - ./db-init/init.sql:/db/init.sql
+      - ./db-init/entrypoint.sh:/entrypoint.sh
+    entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
+      
+networks:
+  dev_network:
