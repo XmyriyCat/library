@@ -1,6 +1,6 @@
 namespace Library.Contracts.Requests.Author;
 
-public class UpdateAuthorRequest : BaseDto<UpdateAuthorRequest, Data.Models.Author>
+public class UpdateAuthorRequest
 {
     public string Name { get; set; }
 

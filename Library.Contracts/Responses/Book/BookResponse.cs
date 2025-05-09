@@ -3,7 +3,7 @@ using Library.Contracts.Responses.User;
 
 namespace Library.Contracts.Responses.Book;
 
-public class BookResponse : BaseDto<BookResponse, Data.Models.Book>
+public class BookResponse
 {
     public Guid Id { get; set; }
 
@@ -16,6 +16,6 @@ public class BookResponse : BaseDto<BookResponse, Data.Models.Book>
     public string Description { get; set; }
 
     public AuthorResponse Author { get; set; }
-    
+
     public IEnumerable<UserResponse> BookOwner { get; set; }
 }

@@ -7,15 +7,17 @@
     </PropertyGroup>
 
     <ItemGroup>
+      <ProjectReference Include="..\Library.Contracts\Library.Contracts.csproj" />
       <ProjectReference Include="..\Library.Data\Library.Data.csproj" />
     </ItemGroup>
 
     <ItemGroup>
+      <PackageReference Include="FluentValidation" Version="12.0.0" />
       <PackageReference Include="Mapster" Version="7.4.0" />
     </ItemGroup>
 
     <ItemGroup>
-      <Folder Include="Infrastructure\Mapster\" />
+      <Folder Include="Infrastructure\Validators\Book\" />
     </ItemGroup>
 
 </Project>

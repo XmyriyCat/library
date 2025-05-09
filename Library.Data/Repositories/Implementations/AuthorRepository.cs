@@ -18,13 +18,4 @@ public class AuthorRepository : GenericRepository<Author>, IAuthorRepository
             .Where(x => x.Author.Id == authorId)
             .ToListAsync(token);
     }
-    
-    public override async Task<Author?> GetByIdAsync(Guid id, CancellationToken token = default)
-    {
-        var result = await DataContext.Authors
-            .Include(x => x.Books)
-            .FirstOrDefaultAsync(x => x.Id == id, token);
-
-        return result;
-    }
 }

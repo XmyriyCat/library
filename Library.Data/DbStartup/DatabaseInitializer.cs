@@ -31,6 +31,13 @@ namespace Library.Data.DbStartup
         private static async Task InitializeRolesAsync(InitialDataStorage storage, IdentityDataContext dataContext
             , RoleManager<Role> roleManager)
         {
+            var rolesExist = await dataContext.Set<Role>().AnyAsync(); 
+            
+            if (rolesExist)
+            {
+                return;
+            }
+            
             var roles = storage.Roles;
 
             foreach (var role in roles)
@@ -44,6 +51,13 @@ namespace Library.Data.DbStartup
         private async Task InitializeUsersAsync(InitialDataStorage storage, IdentityDataContext dataContext,
             UserManager<User> userManager)
         {
+            var usersExist = await dataContext.Set<User>().AnyAsync(); 
+            
+            if (usersExist)
+            {
+                return;
+            }
+            
             var users = storage.Users;
 
             var adminUser = storage.Users.FirstOrDefault(u => u.UserName == users[0].UserName)!;

@@ -12,4 +12,12 @@ public class BooksController : ControllerBase
     {
         _bookService = bookService;
     }
+
+    // [HttpGet(ApiEndpoints.Book.GetAll)]
+    // public async Task<IActionResult> GetAll(CancellationToken cancellationToken)
+    // {
+    //     var books = await _bookService.GetAllAsync(cancellationToken);
+    //     
+    //     return Ok(books);
+    // }
 }

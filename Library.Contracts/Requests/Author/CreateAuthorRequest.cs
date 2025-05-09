@@ -1,6 +1,6 @@
 namespace Library.Contracts.Requests.Author;
 
-public class CreateAuthorRequest : BaseDto<CreateAuthorRequest, Data.Models.Author>
+public class CreateAuthorRequest
 {
     public string Name { get; set; }
 

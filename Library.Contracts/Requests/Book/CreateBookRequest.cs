@@ -1,6 +1,6 @@
 namespace Library.Contracts.Requests.Book;
 
-public class CreateBookRequest : BaseDto<CreateBookRequest, Data.Models.Book>
+public class CreateBookRequest
 {
     public string Isbn { get; set; }
 
@@ -11,18 +11,4 @@ public class CreateBookRequest : BaseDto<CreateBookRequest, Data.Models.Book>
     public string Description { get; set; }
 
     public Guid AuthorId { get; set; }
-
-    public override void AddCustomMappings()
-    {
-        SetCustomMappings()
-            .Map(dest => dest.Author,
-                src => new Data.Models.Author
-                {
-                    Id = src.AuthorId
-                });
-
-
-        SetCustomMappingsInverse()
-            .Map(dest => dest.AuthorId, src => src.Author.Id);
-    }
 }

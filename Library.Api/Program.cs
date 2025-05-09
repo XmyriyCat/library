@@ -16,7 +16,9 @@ public class Program
             .ConfigureServices()
             .ConfigureRepositories()
             .ConfigureIdentityCore()
-            .ConfigureMapster();
+            .ConfigureMapster()
+            .ConfigureNewtonsoftJson()
+            .AddFluentValidators();
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
@@ -25,19 +27,18 @@ public class Program
 
         await app.MigrateDbAsync();
         await app.InitializeDbAsync();
+        app.UseValidationMiddleware();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();
         }
-
+        
         app.MapControllers();
-
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
+        
         await app.RunAsync();
     }
 }

@@ -33,6 +33,31 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
         return await DataContext.Set<T>().ToListAsync(token);
     }
 
+    public virtual async Task<IEnumerable<T>> GetAllPaginationAsync(int page = 1, int pageSize = 10, 
+        Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null, CancellationToken token = default)
+    {
+        if (page <= 0)
+        {
+            throw new Exception($"The page should be greater than zero. Page = {page}");
+        }
+
+        if (pageSize <= 0)
+        {
+            throw new Exception($"The page size should be greater than zero. Page size = {pageSize}");
+        }
+
+        var itemsQuery = DataContext.Set<T>()
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize);
+
+        if (orderBy is not null)
+        {
+            orderBy(itemsQuery);
+        }
+
+        return await itemsQuery.ToListAsync(token);
+    }
+
     public virtual async Task<T> UpdateAsync(T item, CancellationToken token = default)
     {
         await using var transaction = await DataContext.Database.BeginTransactionAsync(token);

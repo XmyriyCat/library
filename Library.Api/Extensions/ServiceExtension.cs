@@ -1,6 +1,9 @@
+using FluentValidation;
+using Library.Api.Middlewares;
+using Library.Application;
+using Library.Application.Infrastructure.Mapster;
 using Library.Application.Services.Contracts;
 using Library.Application.Services.Implementations;
-using Library.Contracts;
 using Library.Data;
 using Library.Data.DbStartup;
 using Library.Data.Models;
@@ -10,6 +13,7 @@ using Library.Data.UnitOfWork;
 using Mapster;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
 
 namespace Library.Api.Extensions;
 
@@ -40,10 +44,10 @@ public static class ServiceExtension
         var services = scope.ServiceProvider;
 
         var context = services.GetService<IdentityDataContext>()!;
-        
+
         var roleManager = services.GetRequiredService<RoleManager<Role>>();
         var userManager = services.GetRequiredService<UserManager<User>>();
-        
+
         var initializerDb = new DatabaseInitializer();
         await initializerDb.InitializeAsync(context, userManager, roleManager);
 
@@ -52,9 +56,9 @@ public static class ServiceExtension
 
     public static IServiceCollection ConfigureServices(this IServiceCollection services)
     {
-        services.AddSingleton<IAuthorService, AuthorService>();
-        services.AddSingleton<IBookService, BookService>();
-        
+        services.AddScoped<IAuthorService, AuthorService>();
+        services.AddScoped<IBookService, BookService>();
+
         return services;
     }
 
@@ -67,19 +71,18 @@ public static class ServiceExtension
                 options.Password.RequireUppercase = false;
                 options.Password.RequireLowercase = false;
                 options.Password.RequireNonAlphanumeric = false;
-                
+
                 // Added a space char
                 options.User.AllowedUserNameCharacters += " ";
             })
             .AddEntityFrameworkStores<IdentityDataContext>()
             .AddDefaultTokenProviders();
-        
+
         return services;
     }
 
     public static IServiceCollection ConfigureRepositories(this IServiceCollection services)
     {
-        services.AddScoped<IdentityDataContext>();
         services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
         services.AddScoped<IAuthorRepository, AuthorRepository>();
         services.AddScoped<IBookRepository, BookRepository>();
@@ -90,10 +93,32 @@ public static class ServiceExtension
     public static IServiceCollection ConfigureMapster(this IServiceCollection services)
     {
         // Register Mapster
-        var typeAdapterConfig = TypeAdapterConfig.GlobalSettings;
-        var applicationAssembly = typeof(BaseDto<,>).Assembly;
-        typeAdapterConfig.Scan(applicationAssembly);
+        services.AddMapster();
+        MappingProfile.Configure();
 
         return services;
+    }
+
+    public static IServiceCollection ConfigureNewtonsoftJson(this IServiceCollection services)
+    {
+        services.AddControllersWithViews()
+            .AddNewtonsoftJson(opt =>
+                opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
+        
+        return services;
+    }
+    
+    public static IServiceCollection AddFluentValidators(this IServiceCollection services)
+    {
+        services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Singleton);
+        
+        return services;
+    }
+
+    public static IApplicationBuilder UseValidationMiddleware(this IApplicationBuilder app)
+    {
+        app.UseMiddleware<ValidationMiddleware>();
+
+        return app;
     }
 }

@@ -1,0 +1,46 @@
+using Library.Contracts.Requests.Author;
+using Library.Contracts.Requests.Book;
+using Library.Contracts.Responses.Author;
+using Library.Contracts.Responses.Book;
+using Library.Contracts.Responses.User;
+using Library.Data.Models;
+using Mapster;
+
+namespace Library.Application.Infrastructure.Mapster;
+
+public static class MappingProfile
+{
+    public static void Configure()
+    {
+        // Configure Author profiles
+        TypeAdapterConfig<CreateAuthorRequest, Author>.NewConfig()
+            .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.Country, src => src.Country)
+            .Map(dest => dest.DateOfBirth, src => src.DateOfBirth);
+
+        TypeAdapterConfig<UpdateAuthorRequest, Author>.NewConfig()
+            .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.Country, src => src.Country)
+            .Map(dest => dest.DateOfBirth, src => src.DateOfBirth);
+
+        TypeAdapterConfig<Author, AuthorResponse>.NewConfig()
+            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest => dest.Name, src => src.Name)
+            .Map(dest => dest.Country, src => src.Country)
+            .Map(dest => dest.DateOfBirth, src => src.DateOfBirth);
+
+        TypeAdapterConfig<IEnumerable<Author>, AuthorsResponse>.NewConfig()
+            .Map(dest => dest.Items, src => src.Select(x => x.Adapt<AuthorResponse>()));
+        
+        // Configure Book profiles
+        TypeAdapterConfig<Book, BookResponse>.NewConfig()
+            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest => dest.Isbn, src => src.Isbn)
+            .Map(dest => dest.Title, src => src.Title)
+            .Map(dest => dest.Genre, src => src.Genre)
+            .Map(dest => dest.Description, src => src.Description)
+            .Map(dest => dest.Author, src => src.Author.Adapt<AuthorResponse>())
+            .Map(dest => dest.BookOwner, src =>
+                src.UserBooks.Select(b => b.User.Adapt<UserResponse>()));
+    }
+}
