@@ -233,7 +233,8 @@ namespace Library.Data.Migrations
 
                     b.HasKey("UserId", "BookId");
 
-                    b.HasIndex("BookId");
+                    b.HasIndex("BookId")
+                        .IsUnique();
 
                     b.ToTable("UserBooks");
                 });
@@ -346,7 +347,7 @@ namespace Library.Data.Migrations
             modelBuilder.Entity("Library.Data.Models.Book", b =>
                 {
                     b.HasOne("Library.Data.Models.Author", "Author")
-                        .WithMany("Books")
+                        .WithMany()
                         .HasForeignKey("AuthorId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -366,8 +367,8 @@ namespace Library.Data.Migrations
             modelBuilder.Entity("Library.Data.Models.UserBook", b =>
                 {
                     b.HasOne("Library.Data.Models.Book", "Book")
-                        .WithMany("UserBooks")
-                        .HasForeignKey("BookId")
+                        .WithOne("UserBook")
+                        .HasForeignKey("Library.Data.Models.UserBook", "BookId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -439,14 +440,10 @@ namespace Library.Data.Migrations
                         .IsRequired();
                 });
 
-            modelBuilder.Entity("Library.Data.Models.Author", b =>
-                {
-                    b.Navigation("Books");
-                });
-
             modelBuilder.Entity("Library.Data.Models.Book", b =>
                 {
-                    b.Navigation("UserBooks");
+                    b.Navigation("UserBook")
+                        .IsRequired();
                 });
 
             modelBuilder.Entity("Library.Data.Models.User", b =>

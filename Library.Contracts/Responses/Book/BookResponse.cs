@@ -17,5 +17,5 @@ public class BookResponse
 
     public AuthorResponse Author { get; set; }
 
-    public IEnumerable<UserResponse> BookOwner { get; set; }
+    public UserBookResponse BookOwner { get; set; }
 }

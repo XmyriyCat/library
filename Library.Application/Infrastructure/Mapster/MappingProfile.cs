@@ -31,7 +31,7 @@ public static class MappingProfile
 
         TypeAdapterConfig<IEnumerable<Author>, AuthorsResponse>.NewConfig()
             .Map(dest => dest.Items, src => src.Select(x => x.Adapt<AuthorResponse>()));
-        
+
         // Configure Book profiles
         TypeAdapterConfig<Book, BookResponse>.NewConfig()
             .Map(dest => dest.Id, src => src.Id)
@@ -40,7 +40,19 @@ public static class MappingProfile
             .Map(dest => dest.Genre, src => src.Genre)
             .Map(dest => dest.Description, src => src.Description)
             .Map(dest => dest.Author, src => src.Author.Adapt<AuthorResponse>())
-            .Map(dest => dest.BookOwner, src =>
-                src.UserBooks.Select(b => b.User.Adapt<UserResponse>()));
+            .AfterMapping((src, dest) =>
+            {
+                if (!Equals(src.UserBook, null))
+                {
+                    dest.BookOwner = src.UserBook.Adapt<UserBookResponse>();
+                    dest.BookOwner.User = src.UserBook.User.Adapt<UserResponse>();
+                }
+            });
+
+        // Configure User profiles
+        TypeAdapterConfig<User, UserResponse>.NewConfig()
+            .Map(dest => dest.Id, src => src.Id)
+            .Map(dest => dest.UserName, src => src.UserName)
+            .Map(dest => dest.Email, src => src.Email);
     }
 }

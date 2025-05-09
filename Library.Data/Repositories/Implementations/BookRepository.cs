@@ -14,7 +14,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
     {
         var result = await DataContext.Books
             .Include(x => x.Author)
-            .Include(x => x.UserBooks)
+            .Include(x => x.UserBook)
             .FirstOrDefaultAsync(x => x.Id == id, token);
 
         return result;
@@ -24,7 +24,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
     {
         return await DataContext.Books
             .Include(x => x.Author)
-            .Include(x => x.UserBooks)
+            .Include(x => x.UserBook)
             .ToListAsync(token);
     }
 
@@ -32,7 +32,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
     {
         var result = await DataContext.Books
             .Include(x => x.Author)
-            .Include(x => x.UserBooks)
+            .Include(x => x.UserBook)
             .FirstOrDefaultAsync(x => x.Isbn.ToLower() == isbn.ToLower(), token);
 
         return result;

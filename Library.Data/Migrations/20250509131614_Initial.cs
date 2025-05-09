@@ -323,7 +323,8 @@ namespace Library.Data.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_UserBooks_BookId",
                 table: "UserBooks",
-                column: "BookId");
+                column: "BookId",
+                unique: true);
         }
 
         /// <inheritdoc />

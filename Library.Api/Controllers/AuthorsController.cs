@@ -39,6 +39,14 @@ public class AuthorsController : ControllerBase
         return Ok(response);
     }
 
+    [HttpGet(ApiEndpoints.Author.GetBooks)]
+    public async Task<IActionResult> GetAllBooks([FromRoute] Guid id, CancellationToken token)
+    {
+        var response = await _authorService.GetAllBooksAsync(id, token);
+        
+        return Ok(response);
+    }
+
     [HttpPut(ApiEndpoints.Author.Update)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateAuthorRequest request,
         CancellationToken token)

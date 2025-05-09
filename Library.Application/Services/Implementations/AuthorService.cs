@@ -106,12 +106,12 @@ public class AuthorService : IAuthorService
         return await _repositoryWrapper.Authors.AnyAsync(predicate, token);
     }
 
-    public Task<IEnumerable<BookResponse>> GetAllBooksAsync(Guid authorId, CancellationToken token = default)
+    public async Task<IEnumerable<BookResponse>> GetAllBooksAsync(Guid authorId, CancellationToken token = default)
     {
-        // TODO-3: Implement it
+        var books = await _repositoryWrapper.Authors.GetAllBooksAsync(authorId, token);
+        
+        var response = books.Select(x => _mapper.Map<BookResponse>(x));
 
-        //return await _repositoryWrapper.Authors.GetAllBooksAsync(authorId, token);
-
-        throw new NotImplementedException();
+        return response;
     }
 }

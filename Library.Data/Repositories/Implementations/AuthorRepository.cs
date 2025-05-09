@@ -14,7 +14,8 @@ public class AuthorRepository : GenericRepository<Author>, IAuthorRepository
     {
         return await DataContext.Books
             .Include(x => x.Author)
-            .Include(x => x.UserBooks)
+            .Include(x => x.UserBook)
+            .ThenInclude(x => x.User)
             .Where(x => x.Author.Id == authorId)
             .ToListAsync(token);
     }
