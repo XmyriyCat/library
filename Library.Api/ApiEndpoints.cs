@@ -23,7 +23,7 @@ public class ApiEndpoints
     
     public static class Book
     {
-        private const string Base = $"{ApiBase}/book";
+        private const string Base = $"{ApiBase}/books";
 
         public const string Create = Base;
 
