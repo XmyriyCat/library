@@ -13,6 +13,6 @@ public class Book
     public string Description { get; set; }
 
     public Author Author { get; set; }
-    
-    public ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
+
+    public UserBook UserBook { get; set; }
 }

@@ -10,6 +10,7 @@ public class IdentityDataContext : IdentityDbContext<User, Role, Guid, IdentityU
 {
     public IdentityDataContext(DbContextOptions<IdentityDataContext> options) : base(options)
     {
+        
     }
     
     public DbSet<Author> Authors { get; set; }

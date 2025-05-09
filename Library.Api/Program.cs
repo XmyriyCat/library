@@ -10,15 +10,24 @@ public class Program
 
         // Add services to the container.
         builder.Services.AddAuthorization();
-        
-        builder.Services.AddControllers();
 
-        // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
+        builder.Services.ConfigureMsSqlContext(builder.Configuration);
+        builder.Services
+            .ConfigureServices()
+            .ConfigureRepositories()
+            .ConfigureIdentityCore()
+            .ConfigureMapster()
+            .ConfigureNewtonsoftJson()
+            .AddFluentValidators();
+
+        builder.Services.AddControllers();
         builder.Services.AddOpenApi();
 
         var app = builder.Build();
 
-        //await app.MigrateDbAsync();
+        await app.MigrateDbAsync();
+        await app.InitializeDbAsync();
+        app.UseValidationMiddleware();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -27,11 +36,9 @@ public class Program
         }
         
         app.MapControllers();
-
         app.UseHttpsRedirection();
-
         app.UseAuthorization();
-
+        
         await app.RunAsync();
     }
 }

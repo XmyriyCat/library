@@ -6,7 +6,7 @@ public class User : IdentityUser<Guid>
 {
     public override Guid Id { get; set; }
     
-    public ICollection<Role> Roles { get; set; } = new List<Role>();
+    public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
     
-    public ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
+    public virtual ICollection<UserBook> UserBooks { get; set; } = new List<UserBook>();
 }

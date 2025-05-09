@@ -1,14 +1,16 @@
+using System;
+
 namespace Library.Data.Models;
 
 public class UserBook
 {
     public Guid UserId { get; set; }
     
-    public User User { get; set; }
+    public virtual User User { get; set; }
     
     public Guid BookId { get; set; }
     
-    public Book Book { get; set; }
+    public virtual Book Book { get; set; }
     
     public DateTime TakenDate { get; set; }
     
