@@ -4,9 +4,9 @@ namespace Library.Data.UnitOfWork;
 
 public interface IRepositoryWrapper
 {
-    IBookRepository Books { get; }
+    public IBookRepository Books { get; }
     
-    IAuthorRepository Authors { get; }
+    public IAuthorRepository Authors { get; }
     
-    Task SaveChangesAsync(CancellationToken token = default);
+    public Task SaveChangesAsync(CancellationToken token = default);
 }
