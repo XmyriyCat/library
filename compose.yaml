@@ -20,6 +20,7 @@ services:
     volumes:
       - ./db-init/init.sql:/db/init.sql
       - ./db-init/entrypoint.sh:/entrypoint.sh
+      - ./db-init/book-images/:/db/book-images/
     entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
       
 networks:
