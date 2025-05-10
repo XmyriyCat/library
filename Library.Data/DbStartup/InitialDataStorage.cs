@@ -1,5 +1,4 @@
 ﻿using Library.Data.Models;
-using Library.Data.Variables;
 using Microsoft.AspNetCore.Identity;
 
 namespace Library.Data.DbStartup
@@ -133,7 +132,6 @@ namespace Library.Data.DbStartup
                     Title = "Carrie",
                     Genre = "Horror",
                     Description = "No description...",
-                    FilePath = BookImages.ImagePath,
                     ImageName = BookGuidList[0] + ".png",
                     Author = _context.Authors
                         .FirstOrDefault(x => x.Id == Guid.Parse("cfa075ea-0243-4771-a948-357d64dd3d3c"))!
@@ -145,7 +143,6 @@ namespace Library.Data.DbStartup
                     Title = "The Shining",
                     Genre = "Novel",
                     Description = "No description...",
-                    FilePath = BookImages.ImagePath,
                     ImageName = BookGuidList[1] + ".png",
                     Author = _context.Authors
                         .FirstOrDefault(x => x.Id == Guid.Parse("cfa075ea-0243-4771-a948-357d64dd3d3c"))!
@@ -157,7 +154,6 @@ namespace Library.Data.DbStartup
                     Title = "Night Shift",
                     Genre = "Horror",
                     Description = "No description...",
-                    FilePath = BookImages.ImagePath,
                     ImageName = BookGuidList[2] + ".png",
                     Author = _context.Authors
                         .FirstOrDefault(x => x.Id == Guid.Parse("cfa075ea-0243-4771-a948-357d64dd3d3c"))!
@@ -169,7 +165,6 @@ namespace Library.Data.DbStartup
                     Title = "Misery",
                     Genre = "Fantasy",
                     Description = "No description...",
-                    FilePath = BookImages.ImagePath,
                     ImageName = BookGuidList[3] + ".png",
                     Author = _context.Authors
                         .FirstOrDefault(x => x.Id == Guid.Parse("cfa075ea-0243-4771-a948-357d64dd3d3c"))!
@@ -181,7 +176,6 @@ namespace Library.Data.DbStartup
                     Title = "CLR via Csharp",
                     Genre = "Technical",
                     Description = "No description...",
-                    FilePath = BookImages.ImagePath,
                     ImageName = BookGuidList[4] + ".png",
                     Author = _context.Authors
                         .FirstOrDefault(x => x.Id == Guid.Parse("11c72779-7cf5-4083-8b8a-f0921aaa37db"))!
@@ -193,7 +187,6 @@ namespace Library.Data.DbStartup
                     Title = "Clean Code",
                     Genre = "Technical",
                     Description = "No description...",
-                    FilePath = BookImages.ImagePath,
                     ImageName = BookGuidList[5] + ".png",
                     Author = _context.Authors
                         .FirstOrDefault(x => x.Id == Guid.Parse("7b671b2a-14e5-4c49-b846-6d960e55c31b"))!
@@ -205,7 +198,6 @@ namespace Library.Data.DbStartup
                     Title = "Clean Architecture",
                     Genre = "Technical",
                     Description = "No description...",
-                    FilePath = BookImages.ImagePath,
                     ImageName = BookGuidList[6] + ".png",
                     Author = _context.Authors
                         .FirstOrDefault(x => x.Id == Guid.Parse("7b671b2a-14e5-4c49-b846-6d960e55c31b"))!

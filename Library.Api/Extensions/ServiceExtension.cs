@@ -115,13 +115,6 @@ public static class ServiceExtension
         return services;
     }
 
-    public static IApplicationBuilder UseValidationMiddleware(this IApplicationBuilder app)
-    {
-        app.UseMiddleware<ValidationMiddleware>();
-
-        return app;
-    }
-
     public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
     {
         app.UseMiddleware<GlobalExceptionHandler>();

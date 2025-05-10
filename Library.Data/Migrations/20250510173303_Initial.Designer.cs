@@ -12,7 +12,7 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Library.Data.Migrations
 {
     [DbContext(typeof(IdentityDataContext))]
-    [Migration("20250510091735_Initial")]
+    [Migration("20250510173303_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -62,9 +62,6 @@ namespace Library.Data.Migrations
                         .IsRequired()
                         .HasMaxLength(300)
                         .HasColumnType("nvarchar(300)");
-
-                    b.Property<string>("FilePath")
-                        .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Genre")
                         .IsRequired()

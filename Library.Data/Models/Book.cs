@@ -13,9 +13,7 @@ public class Book
     public string Description { get; set; }
     
     public string? ImageName { get; set; }
-
-    public string? FilePath { get; set; }
-
+    
     public Author Author { get; set; }
 
     public UserBook UserBook { get; set; }

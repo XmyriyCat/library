@@ -24,14 +24,13 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
-        builder.WebHost.UseUrls("http://+:80");
+        //builder.WebHost.UseUrls("http://+:80");
         
         var app = builder.Build();
 
         await app.MigrateDbAsync();
         await app.InitializeDbAsync();
-        app.UseValidationMiddleware()
-            .UseGlobalExceptionHandler();
+        app.UseGlobalExceptionHandler();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
