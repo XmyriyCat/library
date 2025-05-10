@@ -45,12 +45,13 @@ public static class ServiceExtension
         var services = scope.ServiceProvider;
 
         var context = services.GetService<IdentityDataContext>()!;
+        var config = services.GetService<IConfiguration>()!;
 
         var roleManager = services.GetRequiredService<RoleManager<Role>>();
         var userManager = services.GetRequiredService<UserManager<User>>();
 
         var initializerDb = new DatabaseInitializer();
-        await initializerDb.InitializeAsync(context, userManager, roleManager);
+        await initializerDb.InitializeAsync(context, config, userManager, roleManager);
 
         return app;
     }

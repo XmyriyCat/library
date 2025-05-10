@@ -36,7 +36,7 @@ public class BooksController : ControllerBase
     }
     
     [HttpPost(ApiEndpoints.Book.Create)]
-    public async Task<IActionResult> Create([FromBody] CreateBookRequest request, CancellationToken token)
+    public async Task<IActionResult> Create([FromForm] CreateBookRequest request, CancellationToken token)
     {
         var result = await _bookService.CreateAsync(request, token);
         
@@ -44,7 +44,7 @@ public class BooksController : ControllerBase
     }
     
     [HttpPut(ApiEndpoints.Book.Update)]
-    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateBookRequest request,
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromForm] UpdateBookRequest request,
         CancellationToken token)
     {
         var bookExists = await _bookService.AnyAsync(x => x.Id == id, token);
