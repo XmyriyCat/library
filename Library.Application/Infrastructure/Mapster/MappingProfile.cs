@@ -40,6 +40,7 @@ public static class MappingProfile
             .Map(dest => dest.Title, src => src.Title)
             .Map(dest => dest.Genre, src => src.Genre)
             .Map(dest => dest.Description, src => src.Description)
+            .Map(dest => dest.ImageName, src => src.ImageName)
             .Map(dest => dest.Author, src => src.Author.Adapt<AuthorResponse>())
             .AfterMapping((src, dest) =>
             {
