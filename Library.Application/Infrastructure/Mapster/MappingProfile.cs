@@ -1,3 +1,4 @@
+using Library.Contracts.Models;
 using Library.Contracts.Requests.Author;
 using Library.Contracts.Requests.Book;
 using Library.Contracts.Responses.Author;
@@ -47,6 +48,36 @@ public static class MappingProfile
                     dest.BookOwner = src.UserBook.Adapt<UserBookResponse>();
                     dest.BookOwner.User = src.UserBook.User.Adapt<UserResponse>();
                 }
+            });
+
+        TypeAdapterConfig<CreateBookRequest, Book>.NewConfig()
+            .Map(dest => dest.Isbn, src => src.Isbn)
+            .Map(dest => dest.Title, src => src.Title)
+            .Map(dest => dest.Genre, src => src.Genre)
+            .Map(dest => dest.Description, src => src.Description);
+
+        TypeAdapterConfig<UpdateBookRequest, Book>.NewConfig()
+            .Map(dest => dest.Isbn, src => src.Isbn)
+            .Map(dest => dest.Title, src => src.Title)
+            .Map(dest => dest.Genre, src => src.Genre)
+            .Map(dest => dest.Description, src => src.Description);
+
+        TypeAdapterConfig<IEnumerable<Book>, BooksResponse>.NewConfig()
+            .Map(dest => dest.Items, src => src.Select(x => x.Adapt<BookResponse>()));
+
+        // Configure GetAllBooksOptions
+        TypeAdapterConfig<BooksRequest, GetAllBooksOptions>.NewConfig()
+            .AfterMapping((src, dest) =>
+            {
+                if (src.SortBy is null)
+                {
+                    dest.SortOrder = SortOrder.Unsorted;
+
+                    return;
+                }
+
+                dest.SortField = src.SortBy.Trim('+', '-');
+                dest.SortOrder = src.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending;
             });
 
         // Configure User profiles

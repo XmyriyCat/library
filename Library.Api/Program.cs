@@ -27,7 +27,8 @@ public class Program
 
         await app.MigrateDbAsync();
         await app.InitializeDbAsync();
-        app.UseValidationMiddleware();
+        app.UseValidationMiddleware()
+            .UseGlobalExceptionHandler();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())

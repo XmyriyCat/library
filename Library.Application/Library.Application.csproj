@@ -16,8 +16,4 @@
       <PackageReference Include="Mapster" Version="7.4.0" />
     </ItemGroup>
 
-    <ItemGroup>
-      <Folder Include="Infrastructure\Validators\Book\" />
-    </ItemGroup>
-
 </Project>

@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Library.Data.Exceptions;
 using Microsoft.EntityFrameworkCore;
 
 namespace Library.Data.Repositories;
@@ -38,12 +39,12 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
     {
         if (page <= 0)
         {
-            throw new Exception($"The page should be greater than zero. Page = {page}");
+            throw new DbPageException($"The page should be greater than zero. Page = {page}");
         }
 
         if (pageSize <= 0)
         {
-            throw new Exception($"The page size should be greater than zero. Page size = {pageSize}");
+            throw new DbPageException($"The page size should be greater than zero. Page size = {pageSize}");
         }
 
         var itemsQuery = DataContext.Set<T>()

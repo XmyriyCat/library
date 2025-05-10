@@ -1,8 +1,10 @@
+using Library.Contracts.Variables;
+
 namespace Library.Contracts.Requests;
 
 public class PagedRequest
 {
-    public int Page { get; set; } = 1;
+    public int Page { get; set; } = PagesRequest.DefaultPage;
 
-    public int PageSize { get; set; } = 10;
+    public int PageSize { get; set; } = PagesRequest.DefaultPageSize;
 }
