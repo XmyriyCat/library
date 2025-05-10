@@ -1,5 +1,6 @@
 using FluentValidation;
 using Library.Api.Middlewares;
+using Library.Api.Variables;
 using Library.Application;
 using Library.Application.Infrastructure.Mapster;
 using Library.Application.Services.Contracts;
@@ -92,7 +93,6 @@ public static class ServiceExtension
 
     public static IServiceCollection ConfigureMapster(this IServiceCollection services)
     {
-        // Register Mapster
         services.AddMapster();
         MappingProfile.Configure();
 
@@ -104,14 +104,14 @@ public static class ServiceExtension
         services.AddControllersWithViews()
             .AddNewtonsoftJson(opt =>
                 opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
-        
+
         return services;
     }
-    
+
     public static IServiceCollection AddFluentValidators(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Singleton);
-        
+
         return services;
     }
 
@@ -121,11 +121,26 @@ public static class ServiceExtension
 
         return app;
     }
-    
+
     public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
     {
         app.UseMiddleware<GlobalExceptionHandler>();
 
         return app;
+    }
+
+    public static IServiceCollection ConfigureCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(CorsValues.PolicyName, policy =>
+            {
+                policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
+        return services;
     }
 }
