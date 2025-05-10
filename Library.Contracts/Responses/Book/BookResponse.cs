@@ -15,6 +15,8 @@ public class BookResponse
 
     public string Description { get; set; }
 
+    public string ImageName { get; set; }
+
     public AuthorResponse Author { get; set; }
 
     public UserBookResponse BookOwner { get; set; }

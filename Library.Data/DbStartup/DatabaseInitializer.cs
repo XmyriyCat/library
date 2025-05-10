@@ -1,14 +1,16 @@
 ﻿using System.Security.Claims;
+using Library.Data.Exceptions;
 using Library.Data.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 
 namespace Library.Data.DbStartup
 {
     public class DatabaseInitializer
     {
-        public async Task InitializeAsync(IdentityDataContext dataContext, UserManager<User> userManager
-            , RoleManager<Role> roleManager)
+        public async Task InitializeAsync(IdentityDataContext dataContext, IConfiguration config,
+            UserManager<User> userManager, RoleManager<Role> roleManager)
         {
             var initialData = new InitialDataStorage(dataContext, userManager, roleManager);
 
@@ -16,6 +18,8 @@ namespace Library.Data.DbStartup
             await InitializeUsersAsync(initialData, dataContext, userManager);
             await InitializeAuthorsAsync(initialData, dataContext);
             await InitializeBooksAsync(initialData, dataContext);
+
+            CopyBookImagesToRoot(config);
         }
 
         // Generic initialize method
@@ -100,6 +104,35 @@ namespace Library.Data.DbStartup
             await InitializeGenericAsync(dataContext, authors);
 
             await dataContext.SaveChangesAsync();
+        }
+        
+        private static void CopyBookImagesToRoot(IConfiguration config)
+        {
+            var apiDir = Directory.GetCurrentDirectory();
+            var projectDir = Directory.GetParent(apiDir)!.FullName;
+                
+            var sourceDirectory = Path.Combine(projectDir, config["RootDirectories:BooksInitSeed"]!);
+            var targetDirectory = Path.Combine(apiDir, config["RootDirectories:Books"]!);
+            
+            try
+            {
+                Directory.CreateDirectory(targetDirectory);
+                
+                foreach (var filePath in Directory.GetFiles(sourceDirectory))
+                {
+                    var fileName = Path.GetFileName(filePath);
+                    var destPath = Path.Combine(targetDirectory, fileName);
+                    
+                    if (!File.Exists(destPath))
+                    {
+                        File.Copy(filePath, destPath);
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                throw new CopyFailingException(ex.Message, ex);
+            }
         }
     }
 }

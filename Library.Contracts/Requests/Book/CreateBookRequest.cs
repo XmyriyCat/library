@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Http;
+
 namespace Library.Contracts.Requests.Book;
 
 public class CreateBookRequest
@@ -11,4 +13,6 @@ public class CreateBookRequest
     public string Description { get; set; }
 
     public Guid AuthorId { get; set; }
+    
+    public IFormFile Image { get; set; }
 }

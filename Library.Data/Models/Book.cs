@@ -11,7 +11,9 @@ public class Book
     public string Genre { get; set; }
 
     public string Description { get; set; }
-
+    
+    public string? ImageName { get; set; }
+    
     public Author Author { get; set; }
 
     public UserBook UserBook { get; set; }

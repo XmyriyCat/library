@@ -1,4 +1,5 @@
 using Library.Api.Extensions;
+using Library.Api.Variables;
 
 namespace Library.Api;
 
@@ -18,17 +19,18 @@ public class Program
             .ConfigureIdentityCore()
             .ConfigureMapster()
             .ConfigureNewtonsoftJson()
-            .AddFluentValidators();
+            .AddFluentValidators()
+            .ConfigureCors();
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
-
+        //builder.WebHost.UseUrls("http://+:80");
+        
         var app = builder.Build();
 
         await app.MigrateDbAsync();
         await app.InitializeDbAsync();
-        app.UseValidationMiddleware()
-            .UseGlobalExceptionHandler();
+        app.UseGlobalExceptionHandler();
 
         // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
@@ -36,6 +38,7 @@ public class Program
             app.MapOpenApi();
         }
         
+        app.UseCors(CorsValues.PolicyName);
         app.MapControllers();
         app.UseHttpsRedirection();
         app.UseAuthorization();

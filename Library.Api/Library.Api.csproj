@@ -31,4 +31,8 @@
       <ProjectReference Include="..\Library.Contracts\Library.Contracts.csproj" />
     </ItemGroup>
 
+    <ItemGroup>
+      <Folder Include="wwwroot\books\" />
+    </ItemGroup>
+
 </Project>

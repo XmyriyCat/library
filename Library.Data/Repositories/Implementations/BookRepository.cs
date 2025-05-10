@@ -41,9 +41,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
     }
 
     public async Task<IEnumerable<Book>> GetAllPaginationAsync(int page = 1, int pageSize = 10,
-        Func<IQueryable<Book>, IOrderedQueryable<Book>>? orderBy = null,
-        Expression<Func<Book, bool>>? filterPredication = null,
-        CancellationToken token = default)
+        Expression<Func<Book, bool>>? filterPredication = null, CancellationToken token = default)
     {
         if (page <= 0)
         {
@@ -55,12 +53,8 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
             throw new DbPageException($"The page size should be greater than zero. Page size = {pageSize}");
         }
 
-        if (filterPredication is not null)
-        {
-        }
-
         IQueryable<Book> itemsQuery;
-        
+
         if (filterPredication is not null)
         {
             itemsQuery = DataContext.Books
@@ -81,17 +75,34 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
                 .Take(pageSize);
         }
 
-        if (orderBy is not null)
-        {
-            orderBy(itemsQuery);
-        }
-
         return await itemsQuery.ToListAsync(token);
     }
 
     public override async Task<IEnumerable<Book>> GetAllPaginationAsync(int page = 1, int pageSize = 10,
         Func<IQueryable<Book>, IOrderedQueryable<Book>>? orderBy = null, CancellationToken token = default)
     {
-        return await GetAllPaginationAsync(page, pageSize, orderBy, null, token);
+        if (page <= 0)
+        {
+            throw new DbPageException($"The page should be greater than zero. Page = {page}");
+        }
+
+        if (pageSize <= 0)
+        {
+            throw new DbPageException($"The page size should be greater than zero. Page size = {pageSize}");
+        }
+
+        var itemsQuery = DataContext.Books
+            .Include(x => x.Author)
+            .Include(x => x.UserBook)
+            .ThenInclude(x => x.User)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize);
+
+        if (orderBy is not null)
+        {
+            orderBy(itemsQuery);
+        }
+
+        return await itemsQuery.ToListAsync(token);
     }
 }

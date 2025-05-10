@@ -40,6 +40,7 @@ public static class MappingProfile
             .Map(dest => dest.Title, src => src.Title)
             .Map(dest => dest.Genre, src => src.Genre)
             .Map(dest => dest.Description, src => src.Description)
+            .Map(dest => dest.ImageName, src => src.ImageName)
             .Map(dest => dest.Author, src => src.Author.Adapt<AuthorResponse>())
             .AfterMapping((src, dest) =>
             {
@@ -66,19 +67,7 @@ public static class MappingProfile
             .Map(dest => dest.Items, src => src.Select(x => x.Adapt<BookResponse>()));
 
         // Configure GetAllBooksOptions
-        TypeAdapterConfig<BooksRequest, GetAllBooksOptions>.NewConfig()
-            .AfterMapping((src, dest) =>
-            {
-                if (src.SortBy is null)
-                {
-                    dest.SortOrder = SortOrder.Unsorted;
-
-                    return;
-                }
-
-                dest.SortField = src.SortBy.Trim('+', '-');
-                dest.SortOrder = src.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending;
-            });
+        TypeAdapterConfig<BooksRequest, GetAllBooksOptions>.NewConfig();
 
         // Configure User profiles
         TypeAdapterConfig<User, UserResponse>.NewConfig()

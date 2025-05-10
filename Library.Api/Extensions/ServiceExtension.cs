@@ -1,5 +1,6 @@
 using FluentValidation;
 using Library.Api.Middlewares;
+using Library.Api.Variables;
 using Library.Application;
 using Library.Application.Infrastructure.Mapster;
 using Library.Application.Services.Contracts;
@@ -44,12 +45,13 @@ public static class ServiceExtension
         var services = scope.ServiceProvider;
 
         var context = services.GetService<IdentityDataContext>()!;
+        var config = services.GetService<IConfiguration>()!;
 
         var roleManager = services.GetRequiredService<RoleManager<Role>>();
         var userManager = services.GetRequiredService<UserManager<User>>();
 
         var initializerDb = new DatabaseInitializer();
-        await initializerDb.InitializeAsync(context, userManager, roleManager);
+        await initializerDb.InitializeAsync(context, config, userManager, roleManager);
 
         return app;
     }
@@ -92,7 +94,6 @@ public static class ServiceExtension
 
     public static IServiceCollection ConfigureMapster(this IServiceCollection services)
     {
-        // Register Mapster
         services.AddMapster();
         MappingProfile.Configure();
 
@@ -104,28 +105,36 @@ public static class ServiceExtension
         services.AddControllersWithViews()
             .AddNewtonsoftJson(opt =>
                 opt.SerializerSettings.ReferenceLoopHandling = ReferenceLoopHandling.Ignore);
-        
+
         return services;
     }
-    
+
     public static IServiceCollection AddFluentValidators(this IServiceCollection services)
     {
         services.AddValidatorsFromAssemblyContaining<IApplicationMarker>(ServiceLifetime.Singleton);
-        
+
         return services;
     }
 
-    public static IApplicationBuilder UseValidationMiddleware(this IApplicationBuilder app)
-    {
-        app.UseMiddleware<ValidationMiddleware>();
-
-        return app;
-    }
-    
     public static IApplicationBuilder UseGlobalExceptionHandler(this IApplicationBuilder app)
     {
         app.UseMiddleware<GlobalExceptionHandler>();
 
         return app;
+    }
+
+    public static IServiceCollection ConfigureCors(this IServiceCollection services)
+    {
+        services.AddCors(options =>
+        {
+            options.AddPolicy(CorsValues.PolicyName, policy =>
+            {
+                policy.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
+
+        return services;
     }
 }

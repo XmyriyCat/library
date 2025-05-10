@@ -65,6 +65,9 @@ namespace Library.Data.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<string>("ImageName")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("Isbn")
                         .IsRequired()
                         .HasMaxLength(20)
