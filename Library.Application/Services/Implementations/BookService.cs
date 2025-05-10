@@ -92,15 +92,12 @@ public class BookService : IBookService
 
         var options = _mapper.Map<GetAllBooksOptions>(request);
 
-        Func<IQueryable<Book>, IOrderedQueryable<Book>>? orderBy = ConfigureBooksOrdering(options);
-
         Expression<Func<Book, bool>>? filterPredication = ConfigureBooksFiltering(options);
 
         var result = await _repositoryWrapper.Books.GetAllPaginationAsync
         (
             options.Page,
             options.PageSize,
-            orderBy,
             filterPredication,
             token
         );
@@ -114,32 +111,8 @@ public class BookService : IBookService
         return response;
     }
 
-    private Func<IQueryable<Book>, IOrderedQueryable<Book>>? ConfigureBooksOrdering(GetAllBooksOptions options)
-    {
-        Func<IQueryable<Book>, IOrderedQueryable<Book>>? orderByGenre = book => book.OrderBy(b => b.Genre);
-        Func<IQueryable<Book>, IOrderedQueryable<Book>>? orderByAuthor = book => book.OrderBy(b => b.Author);
-
-        switch (options.SortField?.ToLower())
-        {
-            case "genre":
-                return orderByGenre;
-                break;
-            case "author":
-                return orderByAuthor;
-                break;
-        }
-
-        return null;
-    }
-
     private Expression<Func<Book, bool>>? ConfigureBooksFiltering(GetAllBooksOptions options)
     {
-        // Expression<Func<Book, bool>> filterByGenre = book =>
-        //     book.Genre.Equals(options.Genre, StringComparison.OrdinalIgnoreCase);
-        //
-        // Expression<Func<Book, bool>> filterByAuthor = book =>
-        //     book.Author.Name.Equals(options.Author, StringComparison.OrdinalIgnoreCase);
-        
         Expression<Func<Book, bool>> filterByGenre = book => book.Genre.ToLower() == options.Genre!.ToLower();
         
         Expression<Func<Book, bool>> filterByAuthor = book => book.Author.Name.ToLower() == options.Author!.ToLower();

@@ -66,19 +66,7 @@ public static class MappingProfile
             .Map(dest => dest.Items, src => src.Select(x => x.Adapt<BookResponse>()));
 
         // Configure GetAllBooksOptions
-        TypeAdapterConfig<BooksRequest, GetAllBooksOptions>.NewConfig()
-            .AfterMapping((src, dest) =>
-            {
-                if (src.SortBy is null)
-                {
-                    dest.SortOrder = SortOrder.Unsorted;
-
-                    return;
-                }
-
-                dest.SortField = src.SortBy.Trim('+', '-');
-                dest.SortOrder = src.SortBy.StartsWith('-') ? SortOrder.Descending : SortOrder.Ascending;
-            });
+        TypeAdapterConfig<BooksRequest, GetAllBooksOptions>.NewConfig();
 
         // Configure User profiles
         TypeAdapterConfig<User, UserResponse>.NewConfig()
