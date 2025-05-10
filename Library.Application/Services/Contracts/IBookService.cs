@@ -8,16 +8,16 @@ namespace Library.Application.Services.Contracts;
 public interface IBookService
 {
     Task<BookResponse> CreateAsync(CreateBookRequest request, CancellationToken token = default);
-    
+
     Task<BookResponse?> GetByIdOrIsbnAsync(string idOrIsbn, CancellationToken token = default);
-    
+
     Task<BookResponse?> GetByIdAsync(Guid id, CancellationToken token = default);
-    
+
     Task<BookResponse?> GetByIsbnAsync(string isbn, CancellationToken token = default);
 
     Task<BooksResponse> GetAllAsync(BooksRequest request, CancellationToken token = default);
 
-    Task<BookResponse> UpdateAsync(UpdateBookRequest request, CancellationToken token = default);
+    Task<BookResponse> UpdateAsync(Guid bookId, UpdateBookRequest request, CancellationToken token = default);
 
     Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default);
 

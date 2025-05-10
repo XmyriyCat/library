@@ -42,4 +42,33 @@ public class BooksController : ControllerBase
         
         return Ok(result);
     }
+    
+    [HttpPut(ApiEndpoints.Book.Update)]
+    public async Task<IActionResult> Update([FromRoute] Guid id, [FromBody] UpdateBookRequest request,
+        CancellationToken token)
+    {
+        var bookExists = await _bookService.AnyAsync(x => x.Id == id, token);
+
+        if (bookExists is false)
+        {
+            return NotFound();
+        }
+
+        var response = await _bookService.UpdateAsync(id, request, token);
+
+        return Ok(response);
+    }
+
+    [HttpDelete(ApiEndpoints.Book.Delete)]
+    public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken token)
+    {
+        var isDeleted = await _bookService.DeleteByIdAsync(id, token);
+
+        if (!isDeleted)
+        {
+            return NotFound();
+        }
+
+        return Ok();
+    }
 }

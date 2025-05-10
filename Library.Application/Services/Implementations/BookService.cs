@@ -114,7 +114,7 @@ public class BookService : IBookService
     private Expression<Func<Book, bool>>? ConfigureBooksFiltering(GetAllBooksOptions options)
     {
         Expression<Func<Book, bool>> filterByGenre = book => book.Genre.ToLower() == options.Genre!.ToLower();
-        
+
         Expression<Func<Book, bool>> filterByAuthor = book => book.Author.Name.ToLower() == options.Author!.ToLower();
 
         if (options.Genre != null)
@@ -130,23 +130,48 @@ public class BookService : IBookService
         return null;
     }
 
-    public Task<BookResponse> UpdateAsync(UpdateBookRequest request, CancellationToken token = default)
+    public async Task<BookResponse> UpdateAsync(Guid bookId, UpdateBookRequest request,
+        CancellationToken token = default)
     {
-        throw new NotImplementedException();
+        var book = _mapper.Map<Book>(request);
+
+        await _bookValidator.ValidateAndThrowAsync(book, token);
+
+        var author = await _repositoryWrapper.Authors.GetByIdAsync(request.AuthorId, token);
+
+        if (author is null)
+        {
+            throw new AuthorIdNotFoundException($"Author is not found. Author Id: '{request.AuthorId}'");
+        }
+
+        book.Author = author;
+        book.Id = bookId;
+
+        var createdBook = await _repositoryWrapper.Books.UpdateAsync(book, token);
+
+        await _repositoryWrapper.SaveChangesAsync(token);
+
+        var response = _mapper.Map<BookResponse>(createdBook);
+
+        return response;
     }
 
-    public Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default)
+    public async Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default)
     {
-        throw new NotImplementedException();
+        var result = await _repositoryWrapper.Books.DeleteByIdAsync(id, token);
+
+        await _repositoryWrapper.SaveChangesAsync(token);
+
+        return result;
     }
 
-    public Task<int> CountAsync(CancellationToken token = default)
+    public async Task<int> CountAsync(CancellationToken token = default)
     {
-        throw new NotImplementedException();
+        return await _repositoryWrapper.Books.CountAsync(token);
     }
 
-    public Task<bool> AnyAsync(Expression<Func<Book, bool>> predicate, CancellationToken token = default)
+    public async Task<bool> AnyAsync(Expression<Func<Book, bool>> predicate, CancellationToken token = default)
     {
-        throw new NotImplementedException();
+        return await _repositoryWrapper.Books.AnyAsync(predicate, token);
     }
 }
