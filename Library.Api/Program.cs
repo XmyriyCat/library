@@ -21,6 +21,8 @@ public class Program
             .ConfigureNewtonsoftJson()
             .AddFluentValidators()
             .ConfigureRedisCaching(builder.Configuration)
+            .ConfigureJwtAuthentication(builder.Configuration)
+            .ConfigureJwtAuthorization()
             .ConfigureCors();
 
         builder.Services.AddControllers();

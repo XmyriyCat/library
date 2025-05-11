@@ -1,3 +1,4 @@
+using System.Text;
 using FluentValidation;
 using Library.Api.Middlewares;
 using Library.Api.Variables;
@@ -12,8 +13,10 @@ using Library.Data.Repositories.Contracts;
 using Library.Data.Repositories.Implementations;
 using Library.Data.UnitOfWork;
 using Mapster;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 
 namespace Library.Api.Extensions;
@@ -60,6 +63,8 @@ public static class ServiceExtension
     {
         services.AddScoped<IAuthorService, AuthorService>();
         services.AddScoped<IBookService, BookService>();
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<IAuthService, AuthService>();
 
         return services;
     }
@@ -88,7 +93,8 @@ public static class ServiceExtension
         services.AddScoped<IRepositoryWrapper, RepositoryWrapper>();
         services.AddScoped<IAuthorRepository, AuthorRepository>();
         services.AddScoped<IBookRepository, BookRepository>();
-
+        services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        
         return services;
     }
 
@@ -145,7 +151,49 @@ public static class ServiceExtension
             options.Configuration = config["Cache:Redis"];
             options.InstanceName = "LibraryCache_";
         });
-        
+
+        return services;
+    }
+
+    public static IServiceCollection ConfigureJwtAuthentication(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddAuthentication(x =>
+        {
+            x.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+            x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+            x.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+        }).AddJwtBearer(x =>
+        {
+            x.TokenValidationParameters = new TokenValidationParameters
+            {
+                IssuerSigningKey = new SymmetricSecurityKey(
+                    Encoding.UTF8.GetBytes(config["Jwt:Key"]!)),
+                ValidateIssuerSigningKey = true,
+                ValidateLifetime = true,
+                ValidIssuer = config["Jwt:Issuer"]!,
+                ValidAudience = config["Jwt:Audience"]!,
+                ValidateIssuer = true,
+                ValidateAudience = true,
+            };
+        });
+
+        return services;
+    }
+
+    public static IServiceCollection ConfigureJwtAuthorization(this IServiceCollection services)
+    {
+        services.AddAuthorization(x =>
+        {
+            x.AddPolicy(AuthConstants.AdminPolicyName,
+                p => p.RequireClaim(
+                    AuthConstants.RoleClaimName, AuthConstants.AdminClaimValue));
+
+            x.AddPolicy(AuthConstants.ManagerPolicyName,
+                p => p.RequireAssertion(c =>
+                    c.User.HasClaim(m => m is { Type: AuthConstants.RoleClaimName, Value: AuthConstants.AdminClaimValue }) ||
+                    c.User.HasClaim(m => m is { Type: AuthConstants.RoleClaimName, Value: AuthConstants.ManagerClaimValue })));
+        });
+
         return services;
     }
 }
