@@ -20,6 +20,7 @@ public class Program
             .ConfigureMapster()
             .ConfigureNewtonsoftJson()
             .AddFluentValidators()
+            .ConfigureRedisCaching(builder.Configuration)
             .ConfigureCors();
 
         builder.Services.AddControllers();

@@ -137,4 +137,15 @@ public static class ServiceExtension
 
         return services;
     }
+
+    public static IServiceCollection ConfigureRedisCaching(this IServiceCollection services, IConfiguration config)
+    {
+        services.AddStackExchangeRedisCache(options =>
+        {
+            options.Configuration = config["Cache:Redis"];
+            options.InstanceName = "LibraryCache_";
+        });
+        
+        return services;
+    }
 }
