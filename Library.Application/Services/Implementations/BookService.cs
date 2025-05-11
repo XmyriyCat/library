@@ -50,7 +50,7 @@ public class BookService : IBookService
         book.Author = author;
 
         var createdBook = await _repositoryWrapper.Books.CreateAsync(book, token);
-        
+
         await UploadImageAsync(request.Image, createdBook.Id, token);
 
         await _repositoryWrapper.SaveChangesAsync(token);
@@ -157,9 +157,9 @@ public class BookService : IBookService
         book.Id = bookId;
 
         var updatedBook = await _repositoryWrapper.Books.UpdateAsync(book, token);
-        
+
         DeleteImage(updatedBook.Id);
-        
+
         await UploadImageAsync(request.Image, updatedBook.Id, token);
 
         await _repositoryWrapper.SaveChangesAsync(token);
@@ -174,7 +174,7 @@ public class BookService : IBookService
         var result = await _repositoryWrapper.Books.DeleteByIdAsync(id, token);
 
         DeleteImage(id);
-        
+
         await _repositoryWrapper.SaveChangesAsync(token);
 
         return result;
@@ -190,13 +190,25 @@ public class BookService : IBookService
         return await _repositoryWrapper.Books.AnyAsync(predicate, token);
     }
 
+    public async Task<ImageResult?> GetBookImageByIdOrIsbnAsync(string idOrIsbn, CancellationToken token = default)
+    {
+        var book = await GetByIdOrIsbnAsync(idOrIsbn, token);
+
+        if (book is null)
+        {
+            return null;
+        }
+
+        return await GetImageAsync(book.ImageName, token);
+    }
+
     private async Task UploadImageAsync(IFormFile image, Guid fileId, CancellationToken token = default)
     {
         if (image is null || image.Length == 0)
         {
             throw new WrongImageException("Your image is empty.");
         }
-        
+
         var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), _config["RootDirectories:Books"]!);
 
         if (!Directory.Exists(directoryPath))
@@ -231,7 +243,7 @@ public class BookService : IBookService
         {
             throw new FileIdEmptyException("Invalid fileId. The provided GUID is empty.");
         }
-        
+
         var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), _config["RootDirectories:Books"]!);
 
         if (!Directory.Exists(directoryPath))
@@ -260,5 +272,36 @@ public class BookService : IBookService
         }
 
         return deleted;
+    }
+
+    private async Task<ImageResult?> GetImageAsync(string fileName, CancellationToken cancellationToken)
+    {
+        var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), _config["RootDirectories:Books"]!);
+
+        if (!Directory.Exists(directoryPath))
+        {
+            return null;
+        }
+
+        var imageFile = Directory.GetFiles(directoryPath)
+            .FirstOrDefault(file => Path.GetFileName(file).Equals(fileName, StringComparison.OrdinalIgnoreCase));
+
+        if (imageFile is null)
+        {
+            return null;
+        }
+
+        await using var fileStream = new FileStream(imageFile, FileMode.Open, FileAccess.Read);
+        using var memoryStream = new MemoryStream();
+        
+        await fileStream.CopyToAsync(memoryStream, cancellationToken);
+
+        var result = new ImageResult
+        {
+            ImageBytes = memoryStream.ToArray(),
+            MimeType = SupportedImageExtensions.GetMimeType(imageFile)
+        };
+
+        return result;
     }
 }
