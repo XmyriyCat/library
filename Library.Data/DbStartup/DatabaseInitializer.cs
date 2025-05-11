@@ -76,14 +76,21 @@ namespace Library.Data.DbStartup
             await userManager.CreateAsync(managerUser1, "password");
             await userManager.AddToRoleAsync(managerUser1, Variables.Roles.Manager);
             await userManager.AddClaimAsync(managerUser1, new Claim(Variables.Claims.Role, Variables.Roles.Manager));
-            await userManager.AddClaimAsync(managerUser1, new Claim(Variables.Claims.Email, adminUser.Email!));
+            await userManager.AddClaimAsync(managerUser1, new Claim(Variables.Claims.Email, managerUser1.Email!));
             
             var managerUser2 = storage.Users.FirstOrDefault(u => u.UserName == users[2].UserName)!;
             
             await userManager.CreateAsync(managerUser2, "password");
             await userManager.AddToRoleAsync(managerUser2, Variables.Roles.Manager);
             await userManager.AddClaimAsync(managerUser2, new Claim(Variables.Claims.Role, Variables.Roles.Manager));
-            await userManager.AddClaimAsync(managerUser2, new Claim(Variables.Claims.Email, adminUser.Email!));
+            await userManager.AddClaimAsync(managerUser2, new Claim(Variables.Claims.Email, managerUser2.Email!));
+            
+            var simpleUser3 = storage.Users.FirstOrDefault(u => u.UserName == users[3].UserName)!;
+            
+            await userManager.CreateAsync(simpleUser3, "password");
+            await userManager.AddToRoleAsync(simpleUser3, Variables.Roles.User);
+            await userManager.AddClaimAsync(simpleUser3, new Claim(Variables.Claims.Role, Variables.Roles.User));
+            await userManager.AddClaimAsync(simpleUser3, new Claim(Variables.Claims.Email, simpleUser3.Email!));
             
             await dataContext.SaveChangesAsync();
         }

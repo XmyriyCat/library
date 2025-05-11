@@ -67,6 +67,14 @@ namespace Library.Data.DbStartup
                     UserName = "Alex",
                     Email = "AlexAlex22@gmail.com",
                     Roles = [_context.Roles.FirstOrDefault(x => x.Name == Variables.Roles.Manager)!]
+                },
+                new User
+                {
+                    Id = Guid.Parse("8DBA59DC-8BB4-4F07-83D5-71F66938E565"),
+                    SecurityStamp = "7CF18BB6-F42F-4769-A505-66BDF43690E1",
+                    UserName = "Tom",
+                    Email = "tom@gmail.com",
+                    Roles = [_context.Roles.FirstOrDefault(x => x.Name == Variables.Roles.User)!]
                 }
             };
 
@@ -85,6 +93,10 @@ namespace Library.Data.DbStartup
                 new Role
                 {
                     Name = Variables.Roles.Manager
+                },
+                new Role
+                {
+                    Name = Variables.Roles.User
                 }
             };
 
