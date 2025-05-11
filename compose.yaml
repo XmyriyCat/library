@@ -7,7 +7,8 @@
     #     context: .
     #     dockerfile: Library.Api/Dockerfile
     #   ports:
-    #   - "5100:80"
+    #   - "5100:5100"
+    #   - "7070:7070"
     #   depends_on:
     #   - db
     #   networks:
@@ -28,8 +29,16 @@
       volumes:
         - ./db-init/init.sql:/db/init.sql
         - ./db-init/entrypoint.sh:/entrypoint.sh
-        # - ./db-init/book-images/:/db/book-images/
       entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
         
+    library.cache:
+      image: redis:latest
+      container_name: redis-cache
+      restart: always
+      ports:
+        - "6379:6379"
+      networks:
+        - dev_network
+    
   networks:
     dev_network:

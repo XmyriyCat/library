@@ -6,4 +6,15 @@ public static class SupportedImageExtensions
     [
         ".jpg", ".jpeg", ".png"
     ];
+
+    public static string GetMimeType(string filePath)
+    {
+        return Path.GetExtension(filePath).ToLowerInvariant() switch
+        {
+            ".jpg" => "image/jpeg",
+            ".jpeg" => "image/jpeg",
+            ".png" => "image/png",
+            _ => "application/octet-stream"
+        };
+    }
 }

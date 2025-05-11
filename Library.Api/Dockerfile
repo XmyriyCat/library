@@ -1,11 +1,17 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
 USER $APP_UID
 WORKDIR /app
-EXPOSE 80
-EXPOSE 443
+EXPOSE 5100
+EXPOSE 7070
 
 ENV ConnectionStrings:SqlServerConnection="Server=db; Database=LibraryDb; User=sa; Password=DB_Password; TrustServerCertificate=true;"
-ENV ASPNETCORE_URLS=http://+:80
+
+# Set environment variables for Redis connection and cache settings
+ENV CACHE_REDIS="library.cache:6379"
+ENV CACHE_BOOK_IMAGE_KEY_PREFIX="book-img-"
+ENV CACHE_MIME_KEY_PREFIX="mime-img-"
+ENV CACHE_LIFETIME_MINUTES=60
+
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release

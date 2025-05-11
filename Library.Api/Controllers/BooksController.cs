@@ -18,7 +18,7 @@ public class BooksController : ControllerBase
     public async Task<IActionResult> GetAll([FromQuery] BooksRequest request, CancellationToken cancellationToken)
     {
         var result = await _bookService.GetAllAsync(request, cancellationToken);
-        
+
         return Ok(result);
     }
 
@@ -34,15 +34,15 @@ public class BooksController : ControllerBase
 
         return Ok(response);
     }
-    
+
     [HttpPost(ApiEndpoints.Book.Create)]
     public async Task<IActionResult> Create([FromForm] CreateBookRequest request, CancellationToken token)
     {
         var result = await _bookService.CreateAsync(request, token);
-        
+
         return Ok(result);
     }
-    
+
     [HttpPut(ApiEndpoints.Book.Update)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromForm] UpdateBookRequest request,
         CancellationToken token)
@@ -70,5 +70,18 @@ public class BooksController : ControllerBase
         }
 
         return Ok();
+    }
+
+    [HttpGet(ApiEndpoints.Book.GetImage)]
+    public async Task<IActionResult> GetImage([FromRoute] string idOrIsbn, CancellationToken token)
+    {
+        var bookImage = await _bookService.GetBookImageByIdOrIsbnAsync(idOrIsbn, token);
+
+        if (bookImage?.ImageBytes is null || bookImage?.MimeType is null)
+        {
+            return NotFound();
+        }
+
+        return File(bookImage.ImageBytes, bookImage.MimeType);
     }
 }

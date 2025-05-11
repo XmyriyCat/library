@@ -1,4 +1,5 @@
 using System.Linq.Expressions;
+using Library.Contracts.Models;
 using Library.Contracts.Requests.Book;
 using Library.Contracts.Responses.Book;
 using Library.Data.Models;
@@ -24,4 +25,6 @@ public interface IBookService
     Task<int> CountAsync(CancellationToken token = default);
 
     Task<bool> AnyAsync(Expression<Func<Book, bool>> predicate, CancellationToken token = default);
+
+    Task<ImageResult?> GetBookImageByIdOrIsbnAsync(string idOrIsbn, CancellationToken token = default);
 }

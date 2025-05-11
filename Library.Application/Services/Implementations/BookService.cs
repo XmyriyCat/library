@@ -10,6 +10,7 @@ using Library.Data.Models;
 using Library.Data.UnitOfWork;
 using MapsterMapper;
 using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.Extensions.Configuration;
 using DirectoryNotFoundException = Library.Application.Exceptions.DirectoryNotFoundException;
 
@@ -22,16 +23,18 @@ public class BookService : IBookService
     private readonly IValidator<Book> _bookValidator;
     private readonly IValidator<BooksRequest> _pagedRequestValidator;
     private readonly IConfiguration _config;
+    private readonly IDistributedCache _cache;
 
     public BookService(IRepositoryWrapper repositoryWrapper, IMapper mapper,
         IValidator<Book> bookValidator, IValidator<BooksRequest> pagedRequestValidator,
-        IConfiguration config)
+        IConfiguration config, IDistributedCache cache)
     {
         _repositoryWrapper = repositoryWrapper;
         _mapper = mapper;
         _bookValidator = bookValidator;
         _pagedRequestValidator = pagedRequestValidator;
         _config = config;
+        _cache = cache;
     }
 
     public async Task<BookResponse> CreateAsync(CreateBookRequest request, CancellationToken token = default)
@@ -50,7 +53,7 @@ public class BookService : IBookService
         book.Author = author;
 
         var createdBook = await _repositoryWrapper.Books.CreateAsync(book, token);
-        
+
         await UploadImageAsync(request.Image, createdBook.Id, token);
 
         await _repositoryWrapper.SaveChangesAsync(token);
@@ -157,9 +160,9 @@ public class BookService : IBookService
         book.Id = bookId;
 
         var updatedBook = await _repositoryWrapper.Books.UpdateAsync(book, token);
-        
-        DeleteImage(updatedBook.Id);
-        
+
+        await DeleteImageAsync(updatedBook.Id, token);
+
         await UploadImageAsync(request.Image, updatedBook.Id, token);
 
         await _repositoryWrapper.SaveChangesAsync(token);
@@ -173,8 +176,8 @@ public class BookService : IBookService
     {
         var result = await _repositoryWrapper.Books.DeleteByIdAsync(id, token);
 
-        DeleteImage(id);
-        
+        await DeleteImageAsync(id, token);
+
         await _repositoryWrapper.SaveChangesAsync(token);
 
         return result;
@@ -190,6 +193,20 @@ public class BookService : IBookService
         return await _repositoryWrapper.Books.AnyAsync(predicate, token);
     }
 
+    public async Task<ImageResult?> GetBookImageByIdOrIsbnAsync(string idOrIsbn, CancellationToken token = default)
+    {
+        var book = await GetByIdOrIsbnAsync(idOrIsbn, token);
+
+        if (book is null)
+        {
+            return null;
+        }
+
+        var image = await GetImageAsync(book.ImageName, token);
+
+        return image;
+    }
+
     private async Task UploadImageAsync(IFormFile image, Guid fileId, CancellationToken token = default)
     {
         if (image is null || image.Length == 0)
@@ -197,18 +214,18 @@ public class BookService : IBookService
             throw new WrongImageException("Your image is empty.");
         }
         
-        var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), _config["RootDirectories:Books"]!);
-
-        if (!Directory.Exists(directoryPath))
-        {
-            Directory.CreateDirectory(directoryPath);
-        }
-
         var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
 
         if (!SupportedImageExtensions.AllowedExtensions.Contains(fileExtension))
         {
             throw new InvalidImageExtensionException("Unsupported file type.");
+        }
+
+        var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), _config["RootDirectories:Books"]!);
+
+        if (!Directory.Exists(directoryPath))
+        {
+            Directory.CreateDirectory(directoryPath);
         }
 
         var fileName = fileId + fileExtension;
@@ -225,13 +242,13 @@ public class BookService : IBookService
         await image.CopyToAsync(fileStream, token);
     }
 
-    private bool DeleteImage(Guid fileId)
+    private async Task<bool> DeleteImageAsync(Guid fileId, CancellationToken token)
     {
         if (fileId == Guid.Empty)
         {
             throw new FileIdEmptyException("Invalid fileId. The provided GUID is empty.");
         }
-        
+
         var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), _config["RootDirectories:Books"]!);
 
         if (!Directory.Exists(directoryPath))
@@ -251,6 +268,7 @@ public class BookService : IBookService
             try
             {
                 File.Delete(file);
+                await DeleteImageFromCache(file, token);
                 deleted = true;
             }
             catch (IOException ex)
@@ -260,5 +278,101 @@ public class BookService : IBookService
         }
 
         return deleted;
+    }
+
+    private async Task<ImageResult?> GetImageAsync(string fileName, CancellationToken token)
+    {
+        var cachedImage = await GetCachedImage(fileName, token);
+
+        if (cachedImage is not null)
+        {
+            return cachedImage;
+        }
+
+        var directoryPath = Path.Combine(Directory.GetCurrentDirectory(), _config["RootDirectories:Books"]!);
+
+        if (!Directory.Exists(directoryPath))
+        {
+            return null;
+        }
+
+        var imageFile = Directory.GetFiles(directoryPath)
+            .FirstOrDefault(file => Path.GetFileName(file).Equals(fileName, StringComparison.OrdinalIgnoreCase));
+
+        if (imageFile is null)
+        {
+            return null;
+        }
+
+        await using var fileStream = new FileStream(imageFile, FileMode.Open, FileAccess.Read);
+        using var memoryStream = new MemoryStream();
+
+        await fileStream.CopyToAsync(memoryStream, token);
+
+        var result = new ImageResult
+        {
+            ImageBytes = memoryStream.ToArray(),
+            MimeType = SupportedImageExtensions.GetMimeType(imageFile)
+        };
+
+        await SaveImageToCache(result, fileName, token);
+
+        return result;
+    }
+
+    private async Task<ImageResult?> GetCachedImage(string fileName, CancellationToken token)
+    {
+        var cacheKeyPrefix = _config["Cache:BookImageKeyPrefix:BookImage"];
+        var mimeKeyPrefix = _config["Cache:BookImageKeyPrefix:Mime"];
+
+        var imageCacheKey = $"{cacheKeyPrefix}{fileName}";
+        var mimeCacheKey = $"{mimeKeyPrefix}{fileName}";
+
+        var cachedImage = await _cache.GetAsync(imageCacheKey, token);
+        var cachedMime = await _cache.GetStringAsync(mimeCacheKey, token);
+
+        if (cachedImage == null || string.IsNullOrEmpty(cachedMime))
+        {
+            return null;
+        }
+
+        return new ImageResult
+        {
+            ImageBytes = cachedImage,
+            MimeType = cachedMime
+        };
+    }
+
+    private async Task SaveImageToCache(ImageResult image, string fileName, CancellationToken token)
+    {
+        var cacheKeyPrefix = _config["Cache:BookImageKeyPrefix:BookImage"];
+        var mimeKeyPrefix = _config["Cache:BookImageKeyPrefix:Mime"];
+
+        var imageCacheKey = $"{cacheKeyPrefix}{fileName}";
+        var mimeCacheKey = $"{mimeKeyPrefix}{fileName}";
+
+        var cacheLifeTimeMinutes = int.Parse(_config["Cache:BookImageKeyPrefix:CacheLifeTimeMinutes"]!);
+
+        await _cache.SetAsync(imageCacheKey, image.ImageBytes!, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(cacheLifeTimeMinutes)
+        }, token);
+
+        await _cache.SetStringAsync(mimeCacheKey, image.MimeType!, new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(cacheLifeTimeMinutes)
+        }, token);
+    }
+
+    private async Task DeleteImageFromCache(string fileName, CancellationToken token)
+    {
+        var cacheKeyPrefix = _config["Cache:BookImageKeyPrefix:BookImage"];
+        var mimeKeyPrefix = _config["Cache:BookImageKeyPrefix:Mime"];
+
+        var imageCacheKey = $"{cacheKeyPrefix}{fileName}";
+        var mimeCacheKey = $"{mimeKeyPrefix}{fileName}";
+
+        await _cache.RemoveAsync(imageCacheKey, token);
+        await _cache.RemoveAsync(mimeCacheKey, token);
     }
 }
