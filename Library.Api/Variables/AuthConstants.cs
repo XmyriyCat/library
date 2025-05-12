@@ -2,7 +2,7 @@ namespace Library.Api.Variables;
 
 public static class AuthConstants
 {
-    public const string RoleClaimName = "role";
+    public const string RoleClaimName = System.Security.Claims.ClaimTypes.Role;
     
     public const string AdminPolicyName = "Admin";
     public const string AdminClaimValue = "admin";
