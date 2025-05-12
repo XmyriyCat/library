@@ -10,5 +10,7 @@ public interface IRepositoryWrapper
     
     public IRefreshTokenRepository RefreshTokens { get; }
     
+    public IUserBookRepository UserBooks { get; }
+    
     public Task SaveChangesAsync(CancellationToken token = default);
 }

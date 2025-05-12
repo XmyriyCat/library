@@ -15,9 +15,9 @@ public class BooksController : ControllerBase
     }
 
     [HttpGet(ApiEndpoints.Book.GetAll)]
-    public async Task<IActionResult> GetAll([FromQuery] BooksRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll([FromQuery] BooksRequest request, CancellationToken token)
     {
-        var result = await _bookService.GetAllAsync(request, cancellationToken);
+        var result = await _bookService.GetAllAsync(request, token);
 
         return Ok(result);
     }

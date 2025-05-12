@@ -65,6 +65,7 @@ public static class ServiceExtension
         services.AddScoped<IBookService, BookService>();
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<IAuthService, AuthService>();
+        services.AddScoped<IUserBookService, UserBookService>();
 
         return services;
     }
@@ -94,6 +95,7 @@ public static class ServiceExtension
         services.AddScoped<IAuthorRepository, AuthorRepository>();
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
+        services.AddScoped<IUserBookRepository, UserBookRepository>();
         
         return services;
     }

@@ -18,6 +18,7 @@ namespace Library.Data.DbStartup
             await InitializeUsersAsync(initialData, dataContext, userManager);
             await InitializeAuthorsAsync(initialData, dataContext);
             await InitializeBooksAsync(initialData, dataContext);
+            await InitializeUserBooksAsync(initialData, dataContext);
 
             CopyBookImagesToRoot(config);
         }
@@ -35,13 +36,13 @@ namespace Library.Data.DbStartup
         private static async Task InitializeRolesAsync(InitialDataStorage storage, IdentityDataContext dataContext
             , RoleManager<Role> roleManager)
         {
-            var rolesExist = await dataContext.Set<Role>().AnyAsync(); 
-            
+            var rolesExist = await dataContext.Set<Role>().AnyAsync();
+
             if (rolesExist)
             {
                 return;
             }
-            
+
             var roles = storage.Roles;
 
             foreach (var role in roles)
@@ -55,41 +56,41 @@ namespace Library.Data.DbStartup
         private async Task InitializeUsersAsync(InitialDataStorage storage, IdentityDataContext dataContext,
             UserManager<User> userManager)
         {
-            var usersExist = await dataContext.Set<User>().AnyAsync(); 
-            
+            var usersExist = await dataContext.Set<User>().AnyAsync();
+
             if (usersExist)
             {
                 return;
             }
-            
+
             var users = storage.Users;
 
             var adminUser = storage.Users.FirstOrDefault(u => u.UserName == users[0].UserName)!;
-            
+
             await userManager.CreateAsync(adminUser, "password");
             await userManager.AddToRoleAsync(adminUser, Variables.Roles.Admin);
             await userManager.AddClaimAsync(adminUser, new Claim(Variables.Claims.Role, Variables.Roles.Admin));
             await userManager.AddClaimAsync(adminUser, new Claim(Variables.Claims.Email, adminUser.Email!));
 
             var managerUser1 = storage.Users.FirstOrDefault(u => u.UserName == users[1].UserName)!;
-            
+
             await userManager.CreateAsync(managerUser1, "password");
             await userManager.AddToRoleAsync(managerUser1, Variables.Roles.Manager);
             await userManager.AddClaimAsync(managerUser1, new Claim(Variables.Claims.Role, Variables.Roles.Manager));
             await userManager.AddClaimAsync(managerUser1, new Claim(Variables.Claims.Email, managerUser1.Email!));
-            
+
             var managerUser2 = storage.Users.FirstOrDefault(u => u.UserName == users[2].UserName)!;
-            
+
             await userManager.CreateAsync(managerUser2, "password");
             await userManager.AddToRoleAsync(managerUser2, Variables.Roles.Manager);
             await userManager.AddClaimAsync(managerUser2, new Claim(Variables.Claims.Role, Variables.Roles.Manager));
             await userManager.AddClaimAsync(managerUser2, new Claim(Variables.Claims.Email, managerUser2.Email!));
-            
+
             var simpleUser3 = storage.Users.FirstOrDefault(u => u.UserName == users[3].UserName)!;
-            
+
             await userManager.CreateAsync(simpleUser3, "password");
             await userManager.AddClaimAsync(simpleUser3, new Claim(Variables.Claims.Email, simpleUser3.Email!));
-            
+
             await dataContext.SaveChangesAsync();
         }
 
@@ -110,24 +111,24 @@ namespace Library.Data.DbStartup
 
             await dataContext.SaveChangesAsync();
         }
-        
+
         private static void CopyBookImagesToRoot(IConfiguration config)
         {
             var apiDir = Directory.GetCurrentDirectory();
             var projectDir = Directory.GetParent(apiDir)!.FullName;
-                
+
             var sourceDirectory = Path.Combine(projectDir, config["RootDirectories:BooksInitSeed"]!);
             var targetDirectory = Path.Combine(apiDir, config["RootDirectories:Books"]!);
-            
+
             try
             {
                 Directory.CreateDirectory(targetDirectory);
-                
+
                 foreach (var filePath in Directory.GetFiles(sourceDirectory))
                 {
                     var fileName = Path.GetFileName(filePath);
                     var destPath = Path.Combine(targetDirectory, fileName);
-                    
+
                     if (!File.Exists(destPath))
                     {
                         File.Copy(filePath, destPath);
@@ -138,6 +139,15 @@ namespace Library.Data.DbStartup
             {
                 throw new CopyFailingException(ex.Message, ex);
             }
+        }
+
+        private async Task InitializeUserBooksAsync(InitialDataStorage storage, IdentityDataContext dataContext)
+        {
+            var userBook = storage.UserBooks;
+
+            await InitializeGenericAsync(dataContext, userBook);
+            
+            await dataContext.SaveChangesAsync();
         }
     }
 }
