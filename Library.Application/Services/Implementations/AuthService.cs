@@ -1,4 +1,5 @@
 using System.Security.Claims;
+using FluentValidation;
 using Library.Application.Exceptions;
 using Library.Application.Services.Contracts;
 using Library.Contracts.Models;
@@ -17,19 +18,24 @@ public class AuthService : IAuthService
     private readonly ITokenService _tokenService;
     private readonly IConfiguration _config;
     private readonly IRepositoryWrapper _repositoryWrapper;
+    private readonly IValidator<RegisterUserRequest> _registerValidator;
+    private readonly IValidator<LoginUserRequest> _loginValidator;
 
     public AuthService(UserManager<User> userManager, ITokenService tokenService, IConfiguration config,
-        IRepositoryWrapper repositoryWrapper)
+        IRepositoryWrapper repositoryWrapper, IValidator<RegisterUserRequest> registerValidator, 
+        IValidator<LoginUserRequest> loginValidator)
     {
         _userManager = userManager;
         _tokenService = tokenService;
         _config = config;
         _repositoryWrapper = repositoryWrapper;
+        _registerValidator = registerValidator;
+        _loginValidator = loginValidator;
     }
 
     public async Task<AuthorizationResult> RegisterAsync(RegisterUserRequest request, CancellationToken token = default)
     {
-        // TODO: Validate RegisterUserRequest here.
+        await _registerValidator.ValidateAndThrowAsync(request, token);
 
         var existingUser = await _userManager.FindByEmailAsync(request.Email);
 
@@ -52,7 +58,7 @@ public class AuthService : IAuthService
 
             throw new UserCreationException($"Failed to create user: {errorDescriptions}");
         }
-        
+
         await _userManager.AddClaimAsync(user, new Claim(Data.Variables.Claims.Email, user.Email!));
 
         return await GenerateTokensAsync(user, null, token);
@@ -60,7 +66,7 @@ public class AuthService : IAuthService
 
     public async Task<AuthorizationResult?> LoginAsync(LoginUserRequest request, CancellationToken token = default)
     {
-        // TODO: Validate LoginUserRequest here.
+        await _loginValidator.ValidateAndThrowAsync(request, token);
 
         var user = await _userManager.Users.FirstOrDefaultAsync(u => u.Email == request.Email, token);
 
@@ -74,8 +80,6 @@ public class AuthService : IAuthService
 
     public async Task<AuthorizationResult?> RefreshAsync(string refreshToken, CancellationToken token = default)
     {
-        // TODO: Validate RefreshToken here.
-
         var isValidToken = await _tokenService.IsValidToken(refreshToken, token);
 
         if (!isValidToken)
