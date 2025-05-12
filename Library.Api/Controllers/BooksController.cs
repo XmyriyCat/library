@@ -1,5 +1,7 @@
+using Library.Api.Variables;
 using Library.Application.Services.Contracts;
 using Library.Contracts.Requests.Book;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Library.Api.Controllers;
@@ -14,14 +16,16 @@ public class BooksController : ControllerBase
         _bookService = bookService;
     }
 
+    [AllowAnonymous]
     [HttpGet(ApiEndpoints.Book.GetAll)]
-    public async Task<IActionResult> GetAll([FromQuery] BooksRequest request, CancellationToken cancellationToken)
+    public async Task<IActionResult> GetAll([FromQuery] BooksRequest request, CancellationToken token)
     {
-        var result = await _bookService.GetAllAsync(request, cancellationToken);
+        var result = await _bookService.GetAllAsync(request, token);
 
         return Ok(result);
     }
 
+    [AllowAnonymous]
     [HttpGet(ApiEndpoints.Book.Get)]
     public async Task<IActionResult> Get([FromRoute] string idOrIsbn, CancellationToken token)
     {
@@ -35,6 +39,7 @@ public class BooksController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(AuthConstants.ManagerPolicyName)]
     [HttpPost(ApiEndpoints.Book.Create)]
     public async Task<IActionResult> Create([FromForm] CreateBookRequest request, CancellationToken token)
     {
@@ -43,6 +48,7 @@ public class BooksController : ControllerBase
         return Ok(result);
     }
 
+    [Authorize(AuthConstants.ManagerPolicyName)]
     [HttpPut(ApiEndpoints.Book.Update)]
     public async Task<IActionResult> Update([FromRoute] Guid id, [FromForm] UpdateBookRequest request,
         CancellationToken token)
@@ -59,6 +65,7 @@ public class BooksController : ControllerBase
         return Ok(response);
     }
 
+    [Authorize(AuthConstants.AdminPolicyName)]
     [HttpDelete(ApiEndpoints.Book.Delete)]
     public async Task<IActionResult> Delete([FromRoute] Guid id, CancellationToken token)
     {
@@ -72,6 +79,7 @@ public class BooksController : ControllerBase
         return Ok();
     }
 
+    [AllowAnonymous]
     [HttpGet(ApiEndpoints.Book.GetImage)]
     public async Task<IActionResult> GetImage([FromRoute] string idOrIsbn, CancellationToken token)
     {

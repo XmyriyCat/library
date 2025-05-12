@@ -7,13 +7,21 @@ namespace Library.Data.DbStartup
     {
         public readonly List<Guid> BookGuidList =
         [
-            Guid.Parse("a94571e1-7150-490b-bd4b-909e06d39d33"),
-            Guid.Parse("056527af-0a82-4b4b-99f8-7f3ac7b0f0be"),
-            Guid.Parse("4f2f47f2-4beb-479d-9255-d449165fdbee"),
-            Guid.Parse("705452a0-2d44-48d6-936d-22f6ea11a747"),
-            Guid.Parse("eb5b64b7-ed91-4454-8124-def388dcb60b"),
-            Guid.Parse("f3967bfa-c178-4d88-873d-866d34176aa4"),
-            Guid.Parse("d9676151-46c1-4a64-967f-c96b05be752a")
+            Guid.Parse("a94571e1-7150-490b-bd4b-909e06d39d33"), // Carrie
+            Guid.Parse("056527af-0a82-4b4b-99f8-7f3ac7b0f0be"), // The Shining
+            Guid.Parse("4f2f47f2-4beb-479d-9255-d449165fdbee"), // Night Shift
+            Guid.Parse("705452a0-2d44-48d6-936d-22f6ea11a747"), // Misery
+            Guid.Parse("eb5b64b7-ed91-4454-8124-def388dcb60b"), // CLR via Csharp
+            Guid.Parse("f3967bfa-c178-4d88-873d-866d34176aa4"), // Clean Code
+            Guid.Parse("d9676151-46c1-4a64-967f-c96b05be752a")  // Clean Architecture
+        ];
+        
+        public readonly List<Guid> UserGuidList =
+        [
+            Guid.Parse("287f1ab7-670e-444f-9899-e2064bc6731a"), // Paulito (Admin)
+            Guid.Parse("8e484b22-a82b-4536-a2f2-80c73aa0bdfc"), // Ivan (Manager)
+            Guid.Parse("740107c6-714d-4209-97de-90bb929ef2e9"), // Alex (Manager)
+            Guid.Parse("8DBA59DC-8BB4-4F07-83D5-71F66938E565")  // Tom (no role)
         ];
         
         private readonly IdentityDataContext _context;
@@ -39,6 +47,9 @@ namespace Library.Data.DbStartup
 
         public List<Book> Books
             => GenerateBooks();
+        
+        public List<UserBook> UserBooks
+            => GenerateUserBooks();
 
         private List<User> GenerateUsers()
         {
@@ -46,31 +57,31 @@ namespace Library.Data.DbStartup
             {
                 new User
                 {
-                    Id = Guid.Parse("287f1ab7-670e-444f-9899-e2064bc6731a"),
+                    Id = UserGuidList[0],
                     SecurityStamp = "66f022d3-a390-45e4-8526-553dee50b4e1",
                     UserName = "Paulito",
                     Email = "Paulito@gmail.com",
-                    Roles = [_context.Roles.FirstOrDefault(x => x.Name == Variables.Roles.Admin)!]
+                    Roles = [_context.Roles.First(x => x.Name == Variables.Roles.Admin)]
                 },
                 new User
                 {
-                    Id = Guid.Parse("8e484b22-a82b-4536-a2f2-80c73aa0bdfc"),
+                    Id = UserGuidList[1],
                     SecurityStamp = "bdd0864b-daea-45b5-9ca1-33c073888ec6",
                     UserName = "Ivan",
                     Email = "Ivan228@gmail.com",
-                    Roles = [_context.Roles.FirstOrDefault(x => x.Name == Variables.Roles.Manager)!]
+                    Roles = [_context.Roles.First(x => x.Name == Variables.Roles.Manager)]
                 },
                 new User
                 {
-                    Id = Guid.Parse("740107c6-714d-4209-97de-90bb929ef2e9"),
+                    Id = UserGuidList[2],
                     SecurityStamp = "42b19a3e-9273-4127-aad8-2caf3fe5293d",
                     UserName = "Alex",
                     Email = "AlexAlex22@gmail.com",
-                    Roles = [_context.Roles.FirstOrDefault(x => x.Name == Variables.Roles.Manager)!]
+                    Roles = [_context.Roles.First(x => x.Name == Variables.Roles.Manager)]
                 },
                 new User
                 {
-                    Id = Guid.Parse("8DBA59DC-8BB4-4F07-83D5-71F66938E565"),
+                    Id = UserGuidList[3],
                     SecurityStamp = "7CF18BB6-F42F-4769-A505-66BDF43690E1",
                     UserName = "Tom",
                     Email = "tom@gmail.com"
@@ -212,6 +223,36 @@ namespace Library.Data.DbStartup
             };
 
             return books;
+        }
+
+        private List<UserBook> GenerateUserBooks()
+        {
+            var userBooks = new List<UserBook>
+            {
+                new UserBook
+                {
+                    BookId = BookGuidList[0],
+                    UserId = UserGuidList[0],
+                    TakenDate = DateTime.UtcNow.AddDays(-3),
+                    ReturnDate = DateTime.UtcNow.AddDays(4)
+                },
+                new UserBook
+                {
+                    BookId = BookGuidList[2],
+                    UserId = UserGuidList[0],
+                    TakenDate = DateTime.UtcNow.AddDays(-1),
+                    ReturnDate = DateTime.UtcNow.AddDays(5)
+                },
+                new UserBook
+                {
+                    BookId = BookGuidList[5],
+                    UserId = UserGuidList[3],
+                    TakenDate = DateTime.UtcNow.AddDays(-1),
+                    ReturnDate = DateTime.UtcNow.AddDays(6)
+                }
+            };
+
+            return userBooks;
         }
     }
 }

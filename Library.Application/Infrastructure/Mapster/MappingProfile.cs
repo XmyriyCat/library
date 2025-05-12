@@ -66,7 +66,7 @@ public static class MappingProfile
         TypeAdapterConfig<IEnumerable<Book>, BooksResponse>.NewConfig()
             .Map(dest => dest.Items, src => src.Select(x => x.Adapt<BookResponse>()));
 
-        // Configure GetAllBooksOptions
+        // Configure GetAllBooksOptions profiles
         TypeAdapterConfig<BooksRequest, GetAllBooksOptions>.NewConfig();
 
         // Configure User profiles
@@ -74,5 +74,8 @@ public static class MappingProfile
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.UserName, src => src.UserName)
             .Map(dest => dest.Email, src => src.Email);
+        
+        // Configure UserBook profiles
+        TypeAdapterConfig<UserBook, UserBookResponse>.NewConfig();
     }
 }

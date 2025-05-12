@@ -59,6 +59,12 @@ public class GlobalExceptionHandler
                 case UserAlreadyExistsException:
                     response.StatusCode = (int)HttpStatusCode.BadRequest;
                     break;
+                case UserNotFoundException:
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+                case BookNotFoundException:
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
                 case UserCreationException:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     break;

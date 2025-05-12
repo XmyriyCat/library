@@ -78,6 +78,26 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
         return await itemsQuery.ToListAsync(token);
     }
 
+    public async Task<IEnumerable<Book>> GetAllBorrowedBooksAsync(Guid userId, int page = 1, int pageSize = 10,
+        CancellationToken token = default)
+    {
+        return await DataContext.Books
+            .Where(x => x.UserBook.UserId == userId)
+            .Include(x => x.Author)
+            .Include(x => x.UserBook)
+            .ThenInclude(x => x.User)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(token);
+    }
+
+    public async Task<int> CountBorrowedUserBooksAsync(Guid userId, CancellationToken token = default)
+    {
+        return await DataContext.Books
+            .Where(x => x.UserBook.UserId == userId)
+            .CountAsync(token);
+    }
+
     public override async Task<IEnumerable<Book>> GetAllPaginationAsync(int page = 1, int pageSize = 10,
         Func<IQueryable<Book>, IOrderedQueryable<Book>>? orderBy = null, CancellationToken token = default)
     {
