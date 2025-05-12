@@ -56,16 +56,28 @@ public class GlobalExceptionHandler
                 case DirectoryNotFoundException:
                     response.StatusCode = (int)HttpStatusCode.ServiceUnavailable;
                     break;
+                case UserAlreadyExistsException:
+                    response.StatusCode = (int)HttpStatusCode.BadRequest;
+                    break;
+                case UserCreationException:
+                    response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                    break;
+                case UnauthorizedAccessException:
+                    response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
+                case ExpiredRefreshTokenException:
+                    response.StatusCode = (int)HttpStatusCode.Unauthorized;
+                    break;
                 default:
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     break;
             }
 
             var result = JsonSerializer.Serialize(new
-                {
-                    source = error.Source,
-                    message = error.Message
-                });
+            {
+                source = error.Source,
+                message = error.Message
+            });
             await response.WriteAsync(result);
         }
     }

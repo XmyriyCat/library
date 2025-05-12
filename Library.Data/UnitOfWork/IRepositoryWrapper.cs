@@ -8,5 +8,7 @@ public interface IRepositoryWrapper
     
     public IAuthorRepository Authors { get; }
     
+    public IRefreshTokenRepository RefreshTokens { get; }
+    
     public Task SaveChangesAsync(CancellationToken token = default);
 }
