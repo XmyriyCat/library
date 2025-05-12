@@ -88,8 +88,6 @@ namespace Library.Data.DbStartup
             var simpleUser3 = storage.Users.FirstOrDefault(u => u.UserName == users[3].UserName)!;
             
             await userManager.CreateAsync(simpleUser3, "password");
-            await userManager.AddToRoleAsync(simpleUser3, Variables.Roles.User);
-            await userManager.AddClaimAsync(simpleUser3, new Claim(Variables.Claims.Role, Variables.Roles.User));
             await userManager.AddClaimAsync(simpleUser3, new Claim(Variables.Claims.Email, simpleUser3.Email!));
             
             await dataContext.SaveChangesAsync();

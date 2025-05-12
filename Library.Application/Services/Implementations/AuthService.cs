@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Library.Application.Exceptions;
 using Library.Application.Services.Contracts;
 using Library.Contracts.Models;
@@ -51,6 +52,8 @@ public class AuthService : IAuthService
 
             throw new UserCreationException($"Failed to create user: {errorDescriptions}");
         }
+        
+        await _userManager.AddClaimAsync(user, new Claim(Data.Variables.Claims.Email, user.Email!));
 
         return await GenerateTokensAsync(user, null, token);
     }
