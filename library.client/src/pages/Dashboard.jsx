@@ -14,7 +14,6 @@ const Dashboard = () => {
             setLoading(true);
             try {
                 const result = view === 'books' ? await fetchBooks() : await fetchAuthors();
-                console.log(result); // Log the fetched result to see the structure
                 setData(result.items || result); // If there's no 'items', use the entire result as a fallback
             } catch (error) {
                 console.error('Failed to fetch data', error);
