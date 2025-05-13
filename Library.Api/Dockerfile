@@ -1,17 +1,17 @@
 ﻿FROM mcr.microsoft.com/dotnet/aspnet:9.0 AS base
-USER $APP_UID
+ARG APP_UID=1000
 WORKDIR /app
 EXPOSE 5100
-EXPOSE 7070
+EXPOSE 8080
 
+# Set environment variables for MSSQL connection
 ENV ConnectionStrings:SqlServerConnection="Server=db; Database=LibraryDb; User=sa; Password=DB_Password; TrustServerCertificate=true;"
 
 # Set environment variables for Redis connection and cache settings
-ENV CACHE_REDIS="library.cache:6379"
-ENV CACHE_BOOK_IMAGE_KEY_PREFIX="book-img-"
-ENV CACHE_MIME_KEY_PREFIX="mime-img-"
-ENV CACHE_LIFETIME_MINUTES=60
-
+ENV Cache:Redis="library.cache:6379"
+ENV Cache:BookImageKeyPrefix="book-img-"
+ENV Cache:MimeKeyPrefix="mime-img-"
+ENV Cache:CacheLifeTimeMinutes=60
 
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
@@ -32,4 +32,13 @@ RUN dotnet publish "./Library.Api.csproj" -c $BUILD_CONFIGURATION -o /app/publis
 FROM base AS final
 WORKDIR /app
 COPY --from=publish /app/publish .
+
+
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+# Ensure images folder exists and is writable
+RUN mkdir -p /app/wwwroot/images \
+    && chmod -R 777 /app/wwwroot/images
+
 ENTRYPOINT ["dotnet", "Library.Api.dll"]

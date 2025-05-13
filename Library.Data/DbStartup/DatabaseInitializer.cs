@@ -119,6 +119,9 @@ namespace Library.Data.DbStartup
 
             var sourceDirectory = Path.Combine(projectDir, config["RootDirectories:BooksInitSeed"]!);
             var targetDirectory = Path.Combine(apiDir, config["RootDirectories:Books"]!);
+            
+            Console.WriteLine(sourceDirectory);
+            Console.WriteLine(targetDirectory);
 
             try
             {

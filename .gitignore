@@ -239,3 +239,5 @@ yarn-error.log*
 # OS files
 Thumbs.db
 ehthumbs.db
+
+/book-images/
