@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5100/api'; // API base URL is here
+const API_BASE_URL = 'http://localhost:8080/api'; // API base URL is here
 
 export const ApiEndpoints = {
   Author: {
