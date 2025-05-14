@@ -1,5 +1,3 @@
-using Library.Contracts.Responses.Book;
-
 namespace Library.Contracts.Responses.Author;
 
 public class AuthorResponse

@@ -80,6 +80,32 @@ export const fetchAuthorById = async (id) => {
   return response.data;
 };
 
+export const updateAuthor = async (id, data) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.put(ApiEndpoints.Author.Update(id), data, {
+      headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+      },
+  });
+
+  return response.data;
+};
+
+export const createAuthor = async (data) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.post(ApiEndpoints.Author.Create, data, {
+      headers: {
+          Authorization: `Bearer ${accessToken}`,
+          "Content-Type": "application/json"
+      },
+  });
+
+  return response.data;
+};
+
 export const deleteAuthor = async (id) => {
   const accessToken = localStorage.getItem("accessToken");
 
