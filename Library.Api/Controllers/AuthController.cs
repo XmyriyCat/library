@@ -32,7 +32,7 @@ public class AuthController : ControllerBase
 
         if (result is null)
         {
-            return BadRequest();
+            return Unauthorized("Login or Password is wrong.");
         }
 
         return Ok(result);

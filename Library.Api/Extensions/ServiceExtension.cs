@@ -151,7 +151,6 @@ public static class ServiceExtension
         services.AddStackExchangeRedisCache(options =>
         {
             options.Configuration = config["Cache:Redis"];
-            options.InstanceName = "LibraryCache_";
         });
 
         return services;

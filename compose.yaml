@@ -1,44 +1,48 @@
-  services:
-    
-    # library.api:
-    #   image: library.api
-    #   container_name: library-api
-    #   build:
-    #     context: .
-    #     dockerfile: Library.Api/Dockerfile
-    #   ports:
-    #   - "5100:5100"
-    #   - "7070:7070"
-    #   depends_on:
-    #   - db
-    #   networks:
-    #   - dev_network
-    #   volumes:
-    #     - ./book-images:/app/wwwroot/book-images
+services:
 
-    db:
-      image: mcr.microsoft.com/mssql/server:latest
-      container_name: mssql-db
-      ports:
-        - "1433:1433"
-      environment:
-        ACCEPT_EULA: "Y"
-        SA_PASSWORD: "DB_Password"
-      networks:
-        - dev_network
-      volumes:
-        - ./db-init/init.sql:/db/init.sql
-        - ./db-init/entrypoint.sh:/entrypoint.sh
-      entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
-        
-    library.cache:
-      image: redis:latest
-      container_name: redis-cache
-      restart: always
-      ports:
-        - "6379:6379"
-      networks:
-        - dev_network
-    
-  networks:
-    dev_network:
+  library.api:
+    image: library.api
+    container_name: library-api
+    build:
+      context: .
+      dockerfile: Library.Api/Dockerfile
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    networks:
+      - dev_network
+    volumes:
+      - ./book-images:/app/wwwroot/images/books # Working directory with images
+      - ./db-init/book-images:/db-init/book-images/ # DataSeed volume for copying images
+
+  db:
+    image: mcr.microsoft.com/mssql/server:latest
+    container_name: mssql-db
+    ports:
+      - "1433:1433"
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "DB_Password"
+    networks:
+      - dev_network
+    volumes:
+      - mssql_data:/var/opt/mssql
+      - ./db-init/init.sql:/db/init.sql
+      - ./db-init/entrypoint.sh:/entrypoint.sh
+    entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
+
+  library.cache:
+    image: redis:latest
+    container_name: redis-cache
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - dev_network
+
+networks:
+  dev_network:
+
+volumes:
+  mssql_data:

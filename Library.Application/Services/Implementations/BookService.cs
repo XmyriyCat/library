@@ -49,11 +49,17 @@ public class BookService : IBookService
         {
             throw new AuthorIdNotFoundException($"Author is not found. Author Id: '{request.AuthorId}'");
         }
-
+        
         book.Author = author;
 
         var createdBook = await _repositoryWrapper.Books.CreateAsync(book, token);
 
+        var fileExtension = Path.GetExtension(request.Image.FileName).ToLowerInvariant();
+
+        var fileName = createdBook.Id + fileExtension;
+        
+        book.ImageName = fileName;
+        
         await UploadImageAsync(request.Image, createdBook.Id, token);
 
         await _repositoryWrapper.SaveChangesAsync(token);
@@ -156,8 +162,12 @@ public class BookService : IBookService
             throw new AuthorIdNotFoundException($"Author is not found. Author Id: '{request.AuthorId}'");
         }
 
+        var fileExtension = Path.GetExtension(request.Image.FileName).ToLowerInvariant();
+        var fileName = bookId + fileExtension;
+
         book.Author = author;
         book.Id = bookId;
+        book.ImageName = fileName;
 
         var updatedBook = await _repositoryWrapper.Books.UpdateAsync(book, token);
 
@@ -213,7 +223,7 @@ public class BookService : IBookService
         {
             throw new WrongImageException("Your image is empty.");
         }
-        
+
         var fileExtension = Path.GetExtension(image.FileName).ToLowerInvariant();
 
         if (!SupportedImageExtensions.AllowedExtensions.Contains(fileExtension))
@@ -263,12 +273,15 @@ public class BookService : IBookService
 
         var deleted = false;
 
-        foreach (var file in matchingFiles)
+        foreach (var filePath in matchingFiles)
         {
             try
             {
-                File.Delete(file);
-                await DeleteImageFromCache(file, token);
+                File.Delete(filePath);
+
+                var fileName = Path.GetFileName(filePath);
+
+                await DeleteImageFromCache(fileName, token);
                 deleted = true;
             }
             catch (IOException ex)

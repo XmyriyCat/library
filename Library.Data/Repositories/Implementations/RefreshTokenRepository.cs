@@ -41,11 +41,7 @@ public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshT
 
         if (storedRefreshToken is not null)
         {
-            storedRefreshToken.Value = tokenValue;
-            storedRefreshToken.CreationDate = creationDate;
-            storedRefreshToken.ExpirationDate = expiresDate;
-
-            return;
+            DataContext.RefreshTokens.Remove(storedRefreshToken);
         }
 
         var refreshToken = new RefreshToken()
