@@ -20,7 +20,7 @@ const Login = () => {
       localStorage.setItem('accessToken', accessToken);
       localStorage.setItem('refreshToken', refreshToken);
 
-      // Redirect to dashboard after successful registration
+      // Redirect to dashboard after successful login
       navigate('/dashboard');
     } catch (err) {
       if (err.response?.data?.errors) {
@@ -29,34 +29,52 @@ const Login = () => {
           .join('\n');
         setError(messages);
       } else if (err.response?.data?.message) {
-        setError('Registration failed: ' + err.response.data.message);
+        setError('Login failed: ' + err.response.data.message);
       } else if (err.response.data) {
-        setError('Registration failed: ' + err.response.data);
+        setError('Login failed: ' + err.response.data);
       } else {
-        setError('Registration failed: An unknown error occurred.');
+        setError('Login failed: An unknown error occurred.');
       }
     }
   };
 
   return (
-    <div>
-      <h2>Login</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <input
-          type="email"
-          placeholder="Email"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-        />
-        <input
-          type="password"
-          placeholder="Password"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-        />
-        <button type="submit">Login</button>
-      </form>
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-6 col-lg-4">
+          <div className="card shadow-lg p-4">
+            <h2 className="text-center mb-4">Login</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Password</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                />
+              </div>
+              <div className="d-grid">
+                <button type="submit" className="btn btn-primary">Login</button>
+              </div>
+            </form>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };

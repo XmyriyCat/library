@@ -49,24 +49,56 @@ const Register = () => {
   };
 
   return (
-    <div>
-      <h2>Register</h2>
-      {error && <p style={{ color: 'red' }}>{error}</p>}
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label>Email:</label><br />
-          <input type="email" name="email" value={formData.email} onChange={handleChange} required />
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-6 col-lg-4">
+          <div className="card shadow-lg p-4">
+            <h2 className="text-center mb-4">Register</h2>
+            {error && <div className="alert alert-danger">{error}</div>}
+            <form onSubmit={handleSubmit}>
+              <div className="mb-3">
+                <label className="form-label">Email</label>
+                <input
+                  type="email"
+                  className="form-control"
+                  name="email"
+                  value={formData.email}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your email"
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Username</label>
+                <input
+                  type="text"
+                  className="form-control"
+                  name="userName"
+                  value={formData.userName}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your username"
+                />
+              </div>
+              <div className="mb-3">
+                <label className="form-label">Password</label>
+                <input
+                  type="password"
+                  className="form-control"
+                  name="password"
+                  value={formData.password}
+                  onChange={handleChange}
+                  required
+                  placeholder="Enter your password"
+                />
+              </div>
+              <div className="d-grid">
+                <button type="submit" className="btn btn-primary">Register</button>
+              </div>
+            </form>
+          </div>
         </div>
-        <div>
-          <label>Username:</label><br />
-          <input type="text" name="userName" value={formData.userName} onChange={handleChange} required />
-        </div>
-        <div>
-          <label>Password:</label><br />
-          <input type="password" name="password" value={formData.password} onChange={handleChange} required />
-        </div>
-        <button type="submit">Register</button>
-      </form>
+      </div>
     </div>
   );
 };

@@ -1,35 +1,36 @@
-import { useParams } from "react-router-dom";
+import { useParams, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import { fetchBookById, getBookImage, updateBook, deleteBook, takeBook } from "../services/libraryService";
+import {
+  fetchBookById,
+  getBookImage,
+  updateBook,
+  deleteBook,
+  takeBook,
+} from "../services/libraryService";
 
 export default function BookDetails() {
-  const params = useParams();
-  const id = params.id;
+  const { id } = useParams();
 
-  const [book, setBook] = useState(1);
+  const [book, setBook] = useState({});
   const [userRole, setUserRole] = useState(null);
-  const [isEditing, setIsEditing] = useState(false);
   const [image, setImage] = useState(null);
 
   useEffect(() => {
     const fetchBook = async () => {
       try {
         const recievedBook = await fetchBookById(id);
-        console.log(recievedBook);
         setBook(recievedBook);
       } catch (error) {
         console.error("Error fetching book:", error);
       }
     };
 
-    const token = localStorage.getItem("accessToken");
-
     const fetchImage = async () => {
       try {
         const res = await getBookImage(id);
         if (!res.ok) throw new Error("Image fetch failed");
-    
+
         const blob = await res.blob();
         const url = URL.createObjectURL(blob);
         setImage(url);
@@ -38,18 +39,19 @@ export default function BookDetails() {
       }
     };
 
+    const token = localStorage.getItem("accessToken");
     if (token) {
       const decoded = jwtDecode(token);
-      // Assuming roles are in the 'roles' property
       const roles = decoded.role || [];
       if (roles.includes("admin")) {
         setUserRole("admin");
       } else if (roles.includes("manager")) {
         setUserRole("manager");
       } else {
-        setUserRole("user"); // No roles or other roles
+        setUserRole("user");
       }
     }
+
     fetchBook();
     fetchImage();
   }, [id]);
@@ -62,14 +64,13 @@ export default function BookDetails() {
     }
   };
 
-  const handleUpdateBook = async (bookId) => {
+  const handleUpdateBook = async (e) => {
+    e.preventDefault();
     try {
-      const response = await updateBook(bookId, book);
+      const response = await updateBook(book.id, book);
       setBook(response.data);
     } catch (error) {
       console.error("Error updating book:", error);
-    } finally {
-      setIsEditing(false);
     }
   };
 
@@ -80,64 +81,62 @@ export default function BookDetails() {
       console.error("Error deleting book:", error);
     }
   };
-  return (
-    <div>
-      {!isEditing && (
-        <div>
-          <h1>{book.title}</h1>
-          <p>{book.isbn}</p>
-          <p>{book.genre}</p>
-          <p>{book.description}</p>
-          <p>{book.author?.name}</p>
-          {image ? <img src={image} alt={book.title} /> : <p>Loading image...</p>}
-          <button onClick={() => handleTakeBook(book.id)}>Take Book</button>
-          {userRole === "admin" && (
-            <>
-              <button onClick={() => setIsEditing(true)}>Edit Book</button>
-              <button onClick={() => handleDeleteBook(book.id)}>
-                Delete Book
-              </button>
-            </>
-          )}
-          {userRole === "manager" && (
-            <button onClick={() => setIsEditing(true)}>Edit Book</button>
-          )}
-        </div>
-      )}
 
-      {isEditing && (
-        <form>
-          <input
-            type="text"
-            value={book.title}
-            onChange={(e) => setBook({ ...book, title: e.target.value })}
-          />
-          <input
-            type="text"
-            value={book.isbn}
-            onChange={(e) => setBook({ ...book, isbn: e.target.value })}
-          />
-          <input
-            type="text"
-            value={book.genre}
-            onChange={(e) => setBook({ ...book, genre: e.target.value })}
-          />
-          <input
-            type="text"
-            value={book.description}
-            onChange={(e) => setBook({ ...book, description: e.target.value })}
-          />
-          <input
-            type="file"
-            value={image}
-            accept="image/*"
-            onChange={(e) => setImage(e.target.files[0])}
-          />
-          <button onClick={() => handleUpdateBook(book.id)}>
-            Save Changes
-          </button>
-        </form>
-      )}
-    </div>
+  return (
+    <div className="container mt-5">
+      <div className="row justify-content-center">
+        <div className="col-md-8">
+          <div className="card shadow">
+            <div className="card-header bg-primary text-white">
+              <h4>Book Details</h4>
+            </div>
+            <div className="card-body">
+
+              <h5 className="card-title">{book.title}</h5>
+              <p className="card-text"><strong>ISBN:</strong> {book.isbn}</p>
+              <p className="card-text"><strong>Genre:</strong> {book.genre}</p>
+              <p className="card-text"><strong>Description:</strong> {book.description}</p>
+              <p className="card-text"><strong>Author:</strong> {book.author?.name}</p>
+              {image ? (
+                <div className="text-center mb-3">
+                  <img
+                    src={image}
+                    alt={book.title}
+                    className="img-thumbnail"
+                    style={{ maxHeight: "300px" }}
+                  />
+                </div>
+              ) : (
+                <p>Loading image...</p>
+              )}
+              <div className="d-flex gap-2 flex-wrap">
+                <button
+                  className="btn btn-success"
+                  onClick={() => handleTakeBook(book.id)}
+                >
+                  Take Book
+                </button>
+                {(userRole === "admin" || userRole === "manager") && (
+                  <Link to={`/books/${book.id}/edit`} className="btn btn-primary">
+                    Edit Book
+                  </Link>
+                )}
+                {userRole === "admin" && (
+                  <button
+                    className="btn btn-danger"
+                    onClick={() => handleDeleteBook(book.id)}
+                  >
+                    Delete Book
+                  </button>
+                )}
+                <Link to="/dashboard" className="btn btn-secondary ms-auto">
+                  Back to Dashboard
+                </Link>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div >
   );
 }

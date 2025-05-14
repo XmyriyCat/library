@@ -22,14 +22,14 @@ export const getBookImage = async (idOrIsbn) => {
 };
 
 // edit it
-export const takeBook = async (idOrIsbn) => {
-  const response = await axios.get(ApiEndpoints.Book.GetImage(idOrIsbn));
+export const updateBook = async (id, book) => {
+  const response = await axios.put(ApiEndpoints.Book.Update(id));
   return response.data;
 };
 
 // edit it
-export const updateBook = async (id) => {
-  const response = await axios.get(ApiEndpoints.Book.GetImage(id));
+export const takeBook = async (idOrIsbn) => {
+  const response = await axios.get(ApiEndpoints.Book.GetImage(idOrIsbn));
   return response.data;
 };
 
@@ -38,3 +38,4 @@ export const deleteBook = async (id) => {
   const response = await axios.get(ApiEndpoints.Book.GetImage(id));
   return response.data;
 };
+
