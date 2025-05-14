@@ -241,3 +241,4 @@ Thumbs.db
 ehthumbs.db
 
 /book-images/
+mssql_data/*

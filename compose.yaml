@@ -27,6 +27,7 @@ services:
     networks:
       - dev_network
     volumes:
+      - mssql_data:/var/opt/mssql
       - ./db-init/init.sql:/db/init.sql
       - ./db-init/entrypoint.sh:/entrypoint.sh
     entrypoint: [ "/bin/bash", "/entrypoint.sh" ]
@@ -42,3 +43,6 @@ services:
 
 networks:
   dev_network:
+
+volumes:
+  mssql_data:

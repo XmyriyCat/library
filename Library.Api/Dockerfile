@@ -13,6 +13,9 @@ ENV Cache:BookImageKeyPrefix="book-img-"
 ENV Cache:MimeKeyPrefix="mime-img-"
 ENV Cache:CacheLifeTimeMinutes=60
 
+#Set book images path
+ENV RootDirectories:Books="/app/wwwroot/images/books"
+
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src
