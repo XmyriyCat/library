@@ -1,5 +1,5 @@
 import axios from 'axios';
-import refreshToken from '../utils/refreshToken'; // adjust the path if necessary
+import refreshToken from '../utils/refreshToken'; // Adjust path if needed
 
 const instance = axios.create({
   baseURL: 'http://library.api:8080/api',
@@ -20,12 +20,13 @@ instance.interceptors.request.use(
   (error) => Promise.reject(error)
 );
 
-// Response interceptor: refresh token on 401
+// Response interceptor: handle 401 and refresh token
 instance.interceptors.response.use(
   (response) => response,
   async (error) => {
     const originalRequest = error.config;
 
+    // Handle 401: Token expired, try refreshing
     if (
       error.response?.status === 401 &&
       !originalRequest._retry &&
@@ -34,13 +35,15 @@ instance.interceptors.response.use(
       originalRequest._retry = true;
 
       try {
-        await refreshToken();
+        await refreshToken();  // Refresh the token
         const newAccessToken = localStorage.getItem('accessToken');
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
-        return instance(originalRequest); // retry request with new token
+        return instance(originalRequest); // Retry original request
       } catch (refreshError) {
         console.error('Token refresh failed:', refreshError);
-        // Optional: redirect to login or clear storage
+        localStorage.removeItem('accessToken');
+        localStorage.removeItem('refreshToken');
+        window.location.href = '/login';
       }
     }
 

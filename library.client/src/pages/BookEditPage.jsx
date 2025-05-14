@@ -64,8 +64,7 @@ export default function BookDetails() {
             }
 
             await updateBook(book.id, formData);
-            alert("Book updated successfully");
-            navigate(`/books/${book.id}`); // <-- Navigate after alert
+            navigate(`/books/${book.id}`);
         } catch (error) {
             console.error("Error updating book:", error);
             alert("Failed to update book");

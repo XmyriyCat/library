@@ -4,17 +4,16 @@ import { jwtDecode } from "jwt-decode";
 import {
   fetchBookById,
   getBookImage,
-  updateBook,
   deleteBook,
   takeBook,
 } from "../services/libraryService";
 
 export default function BookDetails() {
   const { id } = useParams();
-
   const [book, setBook] = useState({});
   const [userRole, setUserRole] = useState(null);
   const [image, setImage] = useState(null);
+  const [showModal, setShowModal] = useState(false);
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -58,85 +57,149 @@ export default function BookDetails() {
 
   const handleTakeBook = async (bookId) => {
     try {
-      await takeBook(bookId);
+      const result = await takeBook(bookId);
+
+      if (result && result.returnDate) {
+        const returnDate = new Date(result.returnDate).toLocaleDateString();
+        alert(`Book taken successfully! Please return it by ${returnDate}.`);
+        const updatedBook = await fetchBookById(bookId);
+        setBook(updatedBook);
+      }
     } catch (error) {
       console.error("Error taking book:", error);
+      alert("Failed to take book. Please try again.");
     }
   };
 
-  const handleDeleteBook = async (bookId) => {
+  const confirmDelete = async () => {
     try {
-      await deleteBook(bookId);
+      await deleteBook(book.id);
+      setShowModal(false);
+      // Redirect or update state
+      window.location.href = "/dashboard";
     } catch (error) {
       console.error("Error deleting book:", error);
+      alert("Failed to delete book.");
+      setShowModal(false);
     }
   };
 
   return (
-    <div className="container mt-5">
-      <div className="row justify-content-center">
-        <div className="col-md-8">
-          <div className="card shadow">
-            <div className="card-header bg-primary text-white">
-              <h4>Book Details</h4>
-            </div>
-            <div className="card-body">
-
-              <h5 className="card-title">{book.title}</h5>
-              <p className="card-text"><strong>ISBN:</strong> {book.isbn}</p>
-              <p className="card-text"><strong>Genre:</strong> {book.genre}</p>
-              <p className="card-text"><strong>Description:</strong> {book.description}</p>
-              <p className="card-text"><strong>Author:</strong> {book.author?.name}</p>
-              <p className="card-text">
-                <strong>Status:</strong>{" "}
-                {book.bookOwner !== null ? (
-                  <span className="text-danger fw-semibold">Currently Taken</span>
+    <div>
+      <div className="container mt-5">
+        <div className="row justify-content-center">
+          <div className="col-md-8">
+            <div className="card shadow">
+              <div className="card-header bg-primary text-white">
+                <h4>Book Details</h4>
+              </div>
+              <div className="card-body">
+                <h5 className="card-title">{book.title}</h5>
+                <p className="card-text"><strong>ISBN:</strong> {book.isbn}</p>
+                <p className="card-text"><strong>Genre:</strong> {book.genre}</p>
+                <p className="card-text"><strong>Description:</strong> {book.description}</p>
+                <p className="card-text"><strong>Author:</strong> {book.author?.name}</p>
+                <p className="card-text">
+                  <strong>Status:</strong>{" "}
+                  {book.bookOwner !== null ? (
+                    <span className="text-danger fw-semibold">Currently Taken</span>
+                  ) : (
+                    <span className="text-success fw-semibold">Available</span>
+                  )}
+                </p>
+                {image ? (
+                  <div className="text-center mb-3">
+                    <img
+                      src={image}
+                      alt={book.title}
+                      className="img-thumbnail"
+                      style={{ maxHeight: "300px" }}
+                    />
+                  </div>
                 ) : (
-                  <span className="text-success fw-semibold">Available</span>
+                  <p>Loading image...</p>
                 )}
-              </p>
-              {image ? (
-                <div className="text-center mb-3">
-                  <img
-                    src={image}
-                    alt={book.title}
-                    className="img-thumbnail"
-                    style={{ maxHeight: "300px" }}
-                  />
-                </div>
-              ) : (
-                <p>Loading image...</p>
-              )}
-              <div className="d-flex gap-2 flex-wrap">
+                <div className="d-flex gap-2 flex-wrap">
 
-                {(userRole !== null) && (
-                  <button
-                    className="btn btn-success"
-                    onClick={() => handleTakeBook(book.id)}>
-                    Take Book
-                  </button>
-                )}
-                {(userRole === "admin" || userRole === "manager") && (
-                  <Link to={`/books/${book.id}/edit`} className="btn btn-primary">
-                    Edit Book
+                  {userRole !== null && (
+                    <button
+                      className="btn btn-success"
+                      onClick={() => handleTakeBook(book.id)}
+                      disabled={book.bookOwner !== null}
+                      title={book.bookOwner !== null ? "Book is currently taken" : "Take this book"}
+                    >
+                      Take Book
+                    </button>
+                  )}
+                  {(userRole === "admin" || userRole === "manager") && (
+                    <Link to={`/books/${book.id}/edit`} className="btn btn-primary">
+                      Edit Book
+                    </Link>
+                  )}
+                  {userRole === "admin" && (
+                    <button
+                      className="btn btn-danger"
+                      onClick={() => setShowModal(true)}
+                    >
+                      Delete Book
+                    </button>
+                  )}
+                  <Link to="/dashboard" className="btn btn-secondary ms-auto">
+                    Back to Dashboard
                   </Link>
-                )}
-                {userRole === "admin" && (
-                  <button
-                    className="btn btn-danger"
-                    onClick={() => handleDeleteBook(book.id)}
-                  >
-                    Delete Book
-                  </button>
-                )}
-                <Link to="/dashboard" className="btn btn-secondary ms-auto">
-                  Back to Dashboard
-                </Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
-    </div >
+      </div >
+      {showModal && (
+        <div
+          className="modal fade show d-block"
+          tabIndex="-1"
+          style={{
+            backgroundColor: "rgba(0, 0, 0, 0.6)",
+            backdropFilter: "blur(3px)"
+          }}
+        >
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content shadow-lg rounded-4 border-0">
+              <div className="modal-header bg-danger text-white rounded-top-4">
+                <h5 className="modal-title">
+                  <i className="bi bi-exclamation-triangle-fill me-2"></i>
+                  Confirm Deletion
+                </h5>
+                <button
+                  type="button"
+                  className="btn-close btn-close-white"
+                  onClick={() => setShowModal(false)}
+                ></button>
+              </div>
+              <div className="modal-body text-center">
+                <p className="fs-5">
+                  Are you sure you want to delete
+                  <br />
+                  <strong className="text-danger">{book.title}</strong>?
+                </p>
+              </div>
+              <div className="modal-footer justify-content-center border-0 pb-4">
+                <button
+                  className="btn btn-outline-secondary px-4"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+                <button
+                  className="btn btn-danger px-4"
+                  onClick={confirmDelete}
+                >
+                  Yes, Delete
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
   );
 }

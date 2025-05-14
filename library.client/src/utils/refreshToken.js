@@ -1,16 +1,19 @@
 import axios from 'axios';
 import { ApiEndpoints } from '../api/ApiEndpoints';
 
-// Pass `navigate` from a React component
+// Pass `navigate` from a React component (when using react-router-dom)
 const refreshToken = async (navigate) => {
-  const refreshToken = localStorage.getItem('refreshToken');
-
-  if (!refreshToken) {
+  const token = localStorage.getItem('refreshToken');
+  if (!token) {
     throw new Error('No refresh token found');
   }
 
   try {
-    const response = await axios.post(ApiEndpoints.Auth.Refresh, { refreshToken });
+    const response = await axios.post(ApiEndpoints.Auth.Refresh, JSON.stringify(token), {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
     const { accessToken } = response.data;
 
     if (!accessToken) {
@@ -20,12 +23,12 @@ const refreshToken = async (navigate) => {
     localStorage.setItem('accessToken', accessToken);
     return accessToken;
   } catch (error) {
-    console.error('Refresh token failed:', error);
+    console.error('Token refresh failed:', error);
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
-    
+
     if (navigate) {
-      navigate('/login');
+      navigate('/login'); // Redirect to login page if refresh fails
     }
 
     throw error;

@@ -1,12 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { fetchBooks, fetchAuthors } from "../services/libraryService";
 import BooksView from "../components/BooksView";
 import AuthorsView from "../components/AuthorsView";
-import { jwtDecode } from "jwt-decode";
-import { Link } from "react-router-dom"; // Import Link for routing
+import { useSearchParams } from "react-router-dom";
 
 const Dashboard = () => {
-    const [view, setView] = useState("books");
+    const [searchParams, setSearchParams] = useSearchParams();
+    const view = searchParams.get("view") || "books";
     const [data, setData] = useState([]);
     const [loading, setLoading] = useState(false);
 
@@ -22,47 +22,38 @@ const Dashboard = () => {
                 setLoading(false);
             }
         };
-
-        const token = localStorage.getItem("accessToken");
-        if (token) {
-            const decoded = jwtDecode(token);
-            console.log(decoded);
-        }
-
         loadData();
     }, [view]);
 
     return (
-        <div>
-            <div className="container mt-5">
-                <div className="text-center mb-4">
-                    <h1 className="fw-bold">Library Dashboard</h1>
-                    <div className="btn-group mt-3">
-                        <button
-                            className={`btn btn-outline-primary ${view === "books" ? "active" : ""}`}
-                            onClick={() => setView("books")}
-                        >
-                            Books
-                        </button>
-                        <button
-                            className={`btn btn-outline-primary ${view === "authors" ? "active" : ""}`}
-                            onClick={() => setView("authors")}
-                        >
-                            Authors
-                        </button>
-                    </div>
+        <div className="container mt-5">
+            <div className="text-center mb-4">
+                <h1 className="fw-bold">Library Dashboard</h1>
+                <div className="btn-group mt-3">
+                    <button
+                        className={`btn btn-outline-primary ${view === "books" ? "active" : ""}`}
+                        onClick={() => setSearchParams({ view: "books" })}
+                    >
+                        Books
+                    </button>
+                    <button
+                        className={`btn btn-outline-primary ${view === "authors" ? "active" : ""}`}
+                        onClick={() => setSearchParams({ view: "authors" })}
+                    >
+                        Authors
+                    </button>
                 </div>
-
-                {loading ? (
-                    <div className="text-center">
-                        <div className="spinner-border text-primary" role="status" />
-                    </div>
-                ) : (
-                    <div>
-                        {view === "books" ? <BooksView books={data} /> : <AuthorsView authors={data} />}
-                    </div>
-                )}
             </div>
+
+            {loading ? (
+                <div className="text-center">
+                    <div className="spinner-border text-primary" role="status" />
+                </div>
+            ) : view === "books" ? (
+                <BooksView books={data} />
+            ) : (
+                <AuthorsView authors={data} />
+            )}
         </div>
     );
 };
