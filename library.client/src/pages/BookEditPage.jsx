@@ -1,11 +1,11 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import { fetchBookById, getBookImage, updateBook, fetchAuthors } from "../services/libraryService";
+import { fetchBookById, getBookImage, updateBook, fetchAuthors, createBook } from "../services/libraryService";
+import { useSnackbar } from "notistack";
 
 export default function BookDetails() {
     const { id } = useParams();
-
     const [book, setBook] = useState({});
     const [authors, setAuthors] = useState([]);
     const [userRole, setUserRole] = useState(null);
@@ -13,23 +13,26 @@ export default function BookDetails() {
     const [imageBlob, setImageBlob] = useState(null);
     const [imageFile, setImageFile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
+    const [pageMode, setPageMode] = useState("create");
     const navigate = useNavigate();
+    const { enqueueSnackbar } = useSnackbar();
 
     useEffect(() => {
         const loadData = async () => {
             try {
-                const [recievedBook, recievedAuthors] = await Promise.all([
-                    fetchBookById(id),
-                    fetchAuthors()
-                ]);
-                setBook(recievedBook);
-                setAuthors(recievedAuthors.items);
-                const res = await getBookImage(id);
-                if (res.ok) {
-                    const blob = await res.blob();
-                    setImageBlob(blob);
-                    setImage(URL.createObjectURL(blob));
+                if (id !== undefined) {
+                    setPageMode("update")
+                    const recievedBook = await fetchBookById(id)
+                    setBook(recievedBook);
+                    const res = await getBookImage(id);
+                    if (res.ok) {
+                        const blob = await res.blob();
+                        setImageBlob(blob);
+                        setImage(URL.createObjectURL(blob));
+                    }
                 }
+                const recievedAuthors = await fetchAuthors()
+                setAuthors(recievedAuthors.items)
             } catch (err) {
                 console.error("Error loading book details:", err);
             } finally {
@@ -63,11 +66,23 @@ export default function BookDetails() {
                 formData.append("image", imageBlob, `${book.title || "image"}.png`);
             }
 
-            await updateBook(book.id, formData);
-            navigate(`/books/${book.id}`);
+            if (pageMode === "update") {
+                await updateBook(book.id, formData);
+                enqueueSnackbar("Book updated successfully!", { variant: "success" });
+                navigate(`/books/${book.id}`);
+            } else if (pageMode === "create") {
+                const response = await createBook(formData);
+                if (response && response.id) {
+                    enqueueSnackbar("Book created successfully!", { variant: "success" });
+                    navigate(`/books/${response.id}`);
+                } else {
+                    console.error("Book creation failed or returned no ID", response);
+                    enqueueSnackbar("Book creation failed.", { variant: "error" });
+                }
+            }
         } catch (error) {
-            console.error("Error updating book:", error);
-            alert("Failed to update book");
+            console.error("Error processing book:", error);
+            alert("Fail! Something went wrong...");
         }
     };
 
@@ -92,6 +107,36 @@ export default function BookDetails() {
                                         className="form-control"
                                         value={book.title || ""}
                                         onChange={(e) => setBook({ ...book, title: e.target.value })}
+                                    />
+                                </div>
+                                {image && typeof image === "string" && (
+                                    <div className="mb-3 text-center">
+                                        <img
+                                            src={image}
+                                            alt="Book Cover"
+                                            className="img-thumbnail"
+                                            style={{ maxHeight: "300px" }}
+                                        />
+                                    </div>
+                                )}
+                                <div className="mb-3">
+                                    <label className="form-label">Upload New Image</label>
+                                    <input
+                                        type="file"
+                                        className="form-control"
+                                        accept="image/*"
+                                        onChange={(e) => {
+                                            const file = e.target.files[0];
+                                            setImageFile(file);
+
+                                            if (file) {
+                                                if (image && typeof image === "string") {
+                                                    URL.revokeObjectURL(image);
+                                                }
+                                                const imageUrl = URL.createObjectURL(file);
+                                                setImage(imageUrl);
+                                            }
+                                        }}
                                     />
                                 </div>
                                 <div className="mb-3">
@@ -139,36 +184,6 @@ export default function BookDetails() {
                                         ))}
                                     </select>
                                 </div>
-                                <div className="mb-3">
-                                    <label className="form-label">Upload New Image</label>
-                                    <input
-                                        type="file"
-                                        className="form-control"
-                                        accept="image/*"
-                                        onChange={(e) => {
-                                            const file = e.target.files[0];
-                                            setImageFile(file);
-
-                                            if (file) {
-                                                if (image && typeof image === "string") {
-                                                    URL.revokeObjectURL(image);
-                                                }
-                                                const imageUrl = URL.createObjectURL(file);
-                                                setImage(imageUrl);
-                                            }
-                                        }}
-                                    />
-                                </div>
-                                {image && typeof image === "string" && (
-                                    <div className="mb-3 text-center">
-                                        <img
-                                            src={image}
-                                            alt="Book Cover"
-                                            className="img-thumbnail"
-                                            style={{ maxHeight: "300px" }}
-                                        />
-                                    </div>
-                                )}
                                 <div className="d-grid">
                                     <button type="submit" className="btn btn-primary">
                                         Save Changes

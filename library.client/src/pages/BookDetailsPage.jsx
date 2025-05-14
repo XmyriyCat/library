@@ -1,12 +1,8 @@
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
-import {
-  fetchBookById,
-  getBookImage,
-  deleteBook,
-  takeBook,
-} from "../services/libraryService";
+import { fetchBookById, getBookImage, deleteBook, takeBook } from "../services/libraryService";
+import { useSnackbar } from "notistack";
 
 export default function BookDetails() {
   const { id } = useParams();
@@ -14,6 +10,8 @@ export default function BookDetails() {
   const [userRole, setUserRole] = useState(null);
   const [image, setImage] = useState(null);
   const [showModal, setShowModal] = useState(false);
+  const navigate = useNavigate();
+  const { enqueueSnackbar } = useSnackbar();
 
   useEffect(() => {
     const fetchBook = async () => {
@@ -75,8 +73,8 @@ export default function BookDetails() {
     try {
       await deleteBook(book.id);
       setShowModal(false);
-      // Redirect or update state
-      window.location.href = "/dashboard";
+      enqueueSnackbar("Book deleted successfully!", { variant: "info" });
+      navigate("/dashboard");
     } catch (error) {
       console.error("Error deleting book:", error);
       alert("Failed to delete book.");
@@ -95,18 +93,6 @@ export default function BookDetails() {
               </div>
               <div className="card-body">
                 <h5 className="card-title">{book.title}</h5>
-                <p className="card-text"><strong>ISBN:</strong> {book.isbn}</p>
-                <p className="card-text"><strong>Genre:</strong> {book.genre}</p>
-                <p className="card-text"><strong>Description:</strong> {book.description}</p>
-                <p className="card-text"><strong>Author:</strong> {book.author?.name}</p>
-                <p className="card-text">
-                  <strong>Status:</strong>{" "}
-                  {book.bookOwner !== null ? (
-                    <span className="text-danger fw-semibold">Currently Taken</span>
-                  ) : (
-                    <span className="text-success fw-semibold">Available</span>
-                  )}
-                </p>
                 {image ? (
                   <div className="text-center mb-3">
                     <img
@@ -119,6 +105,18 @@ export default function BookDetails() {
                 ) : (
                   <p>Loading image...</p>
                 )}
+                <p className="card-text"><strong>ISBN:</strong> {book.isbn}</p>
+                <p className="card-text"><strong>Genre:</strong> {book.genre}</p>
+                <p className="card-text"><strong>Description:</strong> {book.description}</p>
+                <p className="card-text"><strong>Author:</strong> {book.author?.name}</p>
+                <p className="card-text">
+                  <strong>Status:</strong>{" "}
+                  {book.bookOwner !== null ? (
+                    <span className="text-danger fw-semibold">Currently Taken</span>
+                  ) : (
+                    <span className="text-success fw-semibold">Available</span>
+                  )}
+                </p>
                 <div className="d-flex gap-2 flex-wrap">
 
                   {userRole !== null && (

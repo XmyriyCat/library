@@ -33,6 +33,18 @@ export const updateBook = async (id, formData) => {
   return response.data;
 };
 
+export const createBook = async (formData) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.post(ApiEndpoints.Book.Create, formData, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
+  return response.data;
+};
+
 export const takeBook = async (id) => {
   const accessToken = localStorage.getItem("accessToken");
 
@@ -49,11 +61,29 @@ export const takeBook = async (id) => {
   return response.data;
 };
 
-// EDIT IT
 export const deleteBook = async (id) => {
   const accessToken = localStorage.getItem("accessToken");
 
   const response = await axios.delete(ApiEndpoints.Book.Delete(id),
+    {
+      headers: {
+        Authorization: `Bearer ${accessToken}`,
+        "Content-Type": "application/json"
+      },
+    });
+
+  return response.data;
+};
+
+export const fetchAuthorById = async (id) => {
+  const response = await axios.get(ApiEndpoints.Author.Get(id));
+  return response.data;
+};
+
+export const deleteAuthor = async (id) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.delete(ApiEndpoints.Author.Delete(id),
     {
       headers: {
         Authorization: `Bearer ${accessToken}`,
