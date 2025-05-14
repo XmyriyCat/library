@@ -100,14 +100,14 @@ const Navbar = () => {
                                     </span>
                                 </li>
                                 <li className="nav-item">
-                                    <Link className="nav-link text-light" to="/me">
-                                        Me
-                                    </Link>
-                                </li>
-                                <li className="nav-item">
                                     <button className="btn nav-link text-light" onClick={handleLogout}>
                                         Logout
                                     </button>
+                                </li>
+                                <li className="nav-item">
+                                    <Link className="nav-link text-light" to="/me">
+                                        Me
+                                    </Link>
                                 </li>
                             </>
                         )}

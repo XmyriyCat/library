@@ -21,21 +21,32 @@ export const getBookImage = async (idOrIsbn) => {
   return response;
 };
 
-// edit it
-export const updateBook = async (id, book) => {
-  const response = await axios.put(ApiEndpoints.Book.Update(id));
+export const updateBook = async (id, formData) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.put(ApiEndpoints.Book.Update(id), formData, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "multipart/form-data",
+    },
+  });
   return response.data;
 };
 
-// edit it
+//edit it
 export const takeBook = async (idOrIsbn) => {
-  const response = await axios.get(ApiEndpoints.Book.GetImage(idOrIsbn));
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.post(ApiEndpoints.Book.Take(idOrIsbn), {
+    headers: {
+      Authorization: `Bearer ${accessToken}`
+    },
+  });
   return response.data;
 };
 
-// edit it
+//edit it
 export const deleteBook = async (id) => {
-  const response = await axios.get(ApiEndpoints.Book.GetImage(id));
+  const response = await axios.delete(ApiEndpoints.Book.Delete(id));
   return response.data;
 };
-

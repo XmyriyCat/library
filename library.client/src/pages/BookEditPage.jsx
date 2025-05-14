@@ -1,4 +1,4 @@
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { fetchBookById, getBookImage, updateBook, fetchAuthors } from "../services/libraryService";
@@ -10,35 +10,30 @@ export default function BookDetails() {
     const [authors, setAuthors] = useState([]);
     const [userRole, setUserRole] = useState(null);
     const [image, setImage] = useState(null);
+    const [imageBlob, setImageBlob] = useState(null);
+    const [imageFile, setImageFile] = useState(null);
+    const [isLoading, setIsLoading] = useState(true);
+    const navigate = useNavigate();
 
     useEffect(() => {
-        const fetchBook = async () => {
+        const loadData = async () => {
             try {
-                const recievedBook = await fetchBookById(id);
+                const [recievedBook, recievedAuthors] = await Promise.all([
+                    fetchBookById(id),
+                    fetchAuthors()
+                ]);
                 setBook(recievedBook);
-            } catch (error) {
-                console.error("Error fetching book:", error);
-            }
-        };
-
-        const fetchAllAuthors = async () => {
-            try {
-                const recievedAuthors = await fetchAuthors();
                 setAuthors(recievedAuthors.items);
-            } catch (error) {
-                console.error("Error fetching authors:", error);
-            }
-        };
-
-        const fetchImage = async () => {
-            try {
                 const res = await getBookImage(id);
-                if (!res.ok) throw new Error("Image fetch failed");
-                const blob = await res.blob();
-                const url = URL.createObjectURL(blob);
-                setImage(url);
+                if (res.ok) {
+                    const blob = await res.blob();
+                    setImageBlob(blob);
+                    setImage(URL.createObjectURL(blob));
+                }
             } catch (err) {
-                console.error("Image fetch error:", err);
+                console.error("Error loading book details:", err);
+            } finally {
+                setIsLoading(false);
             }
         };
 
@@ -47,21 +42,39 @@ export default function BookDetails() {
             const decoded = jwtDecode(token);
             const roles = decoded.role || [];
             setUserRole(roles.includes("admin") ? "admin" : roles.includes("manager") ? "manager" : "user");
-            fetchBook();
-            fetchAllAuthors();
-            fetchImage();
+            loadData();
         }
     }, [id]);
 
     const handleUpdateBook = async (e) => {
         e.preventDefault();
+
         try {
-            const response = await updateBook(book.id, book);
-            setBook(response.data);
+            const formData = new FormData();
+            formData.append("title", book.title);
+            formData.append("isbn", book.isbn);
+            formData.append("genre", book.genre);
+            formData.append("description", book.description);
+            formData.append("authorId", book.author?.id || "");
+
+            if (imageFile) {
+                formData.append("image", imageFile);
+            } else if (imageBlob) {
+                formData.append("image", imageBlob, `${book.title || "image"}.png`);
+            }
+
+            await updateBook(book.id, formData);
+            alert("Book updated successfully");
+            navigate(`/books/${book.id}`); // <-- Navigate after alert
         } catch (error) {
             console.error("Error updating book:", error);
+            alert("Failed to update book");
         }
     };
+
+    if (isLoading) {
+        return <div className="container mt-5">Loading book details...</div>;
+    }
 
     return (
         <div className="container mt-5">
@@ -135,6 +148,8 @@ export default function BookDetails() {
                                         accept="image/*"
                                         onChange={(e) => {
                                             const file = e.target.files[0];
+                                            setImageFile(file);
+
                                             if (file) {
                                                 if (image && typeof image === "string") {
                                                     URL.revokeObjectURL(image);

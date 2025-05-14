@@ -35,9 +35,9 @@ const BooksView = ({ books }) => {
                 <strong>Genre:</strong> {book.genre}<br />
                 <strong>ISBN:</strong> {book.isbn}
               </p>
-              {book.bookOwner && (
+              {book.bookOwner !== null ? (
                 <p className="text-danger fw-semibold">Currently Taken</p>
-              )}
+              ) : (<p className="text-success fw-semibold">Available</p>)}
               <div className="mt-auto">
                 <Link to={`/books/${book.id}`} className="btn btn-outline-primary w-100">
                   View Details

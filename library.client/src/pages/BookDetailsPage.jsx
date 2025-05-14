@@ -64,16 +64,6 @@ export default function BookDetails() {
     }
   };
 
-  const handleUpdateBook = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await updateBook(book.id, book);
-      setBook(response.data);
-    } catch (error) {
-      console.error("Error updating book:", error);
-    }
-  };
-
   const handleDeleteBook = async (bookId) => {
     try {
       await deleteBook(bookId);
@@ -97,6 +87,14 @@ export default function BookDetails() {
               <p className="card-text"><strong>Genre:</strong> {book.genre}</p>
               <p className="card-text"><strong>Description:</strong> {book.description}</p>
               <p className="card-text"><strong>Author:</strong> {book.author?.name}</p>
+              <p className="card-text">
+                <strong>Status:</strong>{" "}
+                {book.bookOwner !== null ? (
+                  <span className="text-danger fw-semibold">Currently Taken</span>
+                ) : (
+                  <span className="text-success fw-semibold">Available</span>
+                )}
+              </p>
               {image ? (
                 <div className="text-center mb-3">
                   <img
@@ -110,12 +108,14 @@ export default function BookDetails() {
                 <p>Loading image...</p>
               )}
               <div className="d-flex gap-2 flex-wrap">
-                <button
-                  className="btn btn-success"
-                  onClick={() => handleTakeBook(book.id)}
-                >
-                  Take Book
-                </button>
+
+                {(userRole !== null) && (
+                  <button
+                    className="btn btn-success"
+                    onClick={() => handleTakeBook(book.id)}>
+                    Take Book
+                  </button>
+                )}
                 {(userRole === "admin" || userRole === "manager") && (
                   <Link to={`/books/${book.id}/edit`} className="btn btn-primary">
                     Edit Book
