@@ -49,11 +49,17 @@ public class BookService : IBookService
         {
             throw new AuthorIdNotFoundException($"Author is not found. Author Id: '{request.AuthorId}'");
         }
-
+        
         book.Author = author;
 
         var createdBook = await _repositoryWrapper.Books.CreateAsync(book, token);
 
+        var fileExtension = Path.GetExtension(request.Image.FileName).ToLowerInvariant();
+
+        var fileName = createdBook.Id + fileExtension;
+        
+        book.ImageName = fileName;
+        
         await UploadImageAsync(request.Image, createdBook.Id, token);
 
         await _repositoryWrapper.SaveChangesAsync(token);
@@ -272,9 +278,9 @@ public class BookService : IBookService
             try
             {
                 File.Delete(filePath);
-                
+
                 var fileName = Path.GetFileName(filePath);
-                    
+
                 await DeleteImageFromCache(fileName, token);
                 deleted = true;
             }
@@ -302,7 +308,7 @@ public class BookService : IBookService
         {
             return null;
         }
-        
+
         var imageFile = Directory.GetFiles(directoryPath)
             .FirstOrDefault(file => Path.GetFileName(file).Equals(fileName, StringComparison.OrdinalIgnoreCase));
 
