@@ -1,6 +1,7 @@
 using System.Linq.Expressions;
 using FluentValidation;
 using Library.Application.Exceptions;
+using Library.Application.Extensions;
 using Library.Application.Services.Contracts;
 using Library.Application.Variables;
 using Library.Contracts.Models;
@@ -49,7 +50,7 @@ public class BookService : IBookService
         {
             throw new AuthorIdNotFoundException($"Author is not found. Author Id: '{request.AuthorId}'");
         }
-        
+
         book.Author = author;
 
         var createdBook = await _repositoryWrapper.Books.CreateAsync(book, token);
@@ -57,9 +58,9 @@ public class BookService : IBookService
         var fileExtension = Path.GetExtension(request.Image.FileName).ToLowerInvariant();
 
         var fileName = createdBook.Id + fileExtension;
-        
+
         book.ImageName = fileName;
-        
+
         await UploadImageAsync(request.Image, createdBook.Id, token);
 
         await _repositoryWrapper.SaveChangesAsync(token);
@@ -131,21 +132,39 @@ public class BookService : IBookService
 
     private Expression<Func<Book, bool>>? ConfigureBooksFiltering(GetAllBooksOptions options)
     {
-        Expression<Func<Book, bool>> filterByGenre = book => book.Genre.ToLower() == options.Genre!.ToLower();
+        Expression<Func<Book, bool>>? combinedFilter = null;
 
-        Expression<Func<Book, bool>> filterByAuthor = book => book.Author.Name.ToLower() == options.Author!.ToLower();
-
-        if (options.Genre != null)
+        if (!string.IsNullOrWhiteSpace(options.Genre))
         {
-            return filterByGenre;
+            Expression<Func<Book, bool>> filterByGenre =
+                book => book.Genre.ToLower().Contains(options.Genre.ToLower());
+            
+            combinedFilter = combinedFilter == null
+                ? filterByGenre
+                : combinedFilter.AndAlso(filterByGenre);
         }
 
-        if (options.Author != null)
+        if (!string.IsNullOrWhiteSpace(options.Title))
         {
-            return filterByAuthor;
+            Expression<Func<Book, bool>> filterByTitle =
+                book => book.Title.ToLower().Contains(options.Title.ToLower());
+            
+            combinedFilter = combinedFilter == null
+                ? filterByTitle
+                : combinedFilter.AndAlso(filterByTitle);
         }
 
-        return null;
+        if (!string.IsNullOrWhiteSpace(options.Author))
+        {
+            Expression<Func<Book, bool>> filterByAuthor =
+                book => book.Author.Name.ToLower().Contains(options.Author.ToLower());
+            
+            combinedFilter = combinedFilter == null
+                ? filterByAuthor
+                : combinedFilter.AndAlso(filterByAuthor);
+        }
+
+        return combinedFilter;
     }
 
     public async Task<BookResponse> UpdateAsync(Guid bookId, UpdateBookRequest request,

@@ -7,6 +7,10 @@ public class BooksRequestValidator : AbstractValidator<BooksRequest>
 {
     public BooksRequestValidator()
     {
+        RuleFor(x => x.Title)
+            .Must(x => x is null || x.Length < 50 )
+            .WithMessage("You can only search by 'title' with max length 50 characters.");
+        
         RuleFor(x => x.Genre)
             .Must(x => x is null || x.Length < 30 )
             .WithMessage("You can only filter by 'genre' with max length 30 characters.");
