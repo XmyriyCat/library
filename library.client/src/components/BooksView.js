@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
+import ApiEndpoints from "../api/ApiEndpoints";
 
 const BooksView = ({ books }) => {
   const [userRole, setUserRole] = useState(null);
@@ -29,15 +30,24 @@ const BooksView = ({ books }) => {
       {books.map((book) => (
         <div key={book.id} className="col">
           <div className="card h-100 shadow-sm">
+            <img
+              src={ApiEndpoints.Book.GetImage(book.id)}
+              className="card-img-top"
+              alt={book.title}
+              style={{ height: "200px", objectFit: "cover" }}
+            />
             <div className="card-body d-flex flex-column">
               <h5 className="card-title text-primary">{book.title}</h5>
               <p className="card-text">
                 <strong>Genre:</strong> {book.genre}<br />
-                <strong>ISBN:</strong> {book.isbn}
+                <strong>ISBN:</strong> {book.isbn}<br />
+                <strong>Author:</strong> {book.author?.name}
               </p>
               {book.bookOwner !== null ? (
                 <p className="text-danger fw-semibold">Currently Taken</p>
-              ) : (<p className="text-success fw-semibold">Available</p>)}
+              ) : (
+                <p className="text-success fw-semibold">Available</p>
+              )}
               <div className="mt-auto">
                 <Link to={`/books/${book.id}`} className="btn btn-outline-primary w-100">
                   View Details

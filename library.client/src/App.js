@@ -6,6 +6,8 @@ import Dashboard from "./pages/Dashboard";
 import BookDetails from "./pages/BookDetailsPage";
 import AuthorDetails from "./pages/AuthorDetailsPage";
 import BookEdit from "./pages/BookEditPage";
+import AuthorEdit from "./pages/AuthorEditPage";
+import MePage from "./pages/MePage";
 import Navbar from "./components/Navbar";
 import "bootstrap/dist/css/bootstrap.min.css";
 
@@ -24,6 +26,10 @@ function App() {
         <Route path="/books/create" element={<BookEdit />} />
 
         <Route path="/authors/:id" element={<AuthorDetails />} />
+        <Route path="/authors/:id/edit" element={<AuthorEdit />} />
+        <Route path="/authors/create" element={<AuthorEdit />} />
+
+        <Route path="/me" element={<MePage />} />
 
       </Routes>
     </Router>

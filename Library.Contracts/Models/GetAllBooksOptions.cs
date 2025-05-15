@@ -4,6 +4,8 @@ namespace Library.Contracts.Models;
 
 public class GetAllBooksOptions
 {
+    public string? Title { get; set; }
+    
     public string? Genre { get; set; }
 
     public string? Author { get; set; }

@@ -33,11 +33,20 @@ public static class ServiceExtension
     public static async Task<IApplicationBuilder> MigrateDbAsync(this IApplicationBuilder app)
     {
         using var scope = app.ApplicationServices.CreateScope();
-        var services = scope.ServiceProvider;
+        var context = scope.ServiceProvider.GetRequiredService<IdentityDataContext>();
 
-        var context = services.GetService<IdentityDataContext>();
+        var pendingMigrations = await context.Database.GetPendingMigrationsAsync();
 
-        await context!.Database.MigrateAsync();
+        if (pendingMigrations.Any())
+        {
+            Console.WriteLine("Applying pending migrations...");
+            await context.Database.MigrateAsync();
+            Console.WriteLine("Migrations applied.");
+        }
+        else
+        {
+            Console.WriteLine("Database is already up to date.");
+        }
 
         return app;
     }

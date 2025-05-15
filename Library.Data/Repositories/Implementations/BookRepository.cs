@@ -98,6 +98,18 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
             .CountAsync(token);
     }
 
+    public async Task<int> CountAsync(Expression<Func<Book, bool>>? filterPredication = null, CancellationToken token = default)
+    {
+        if (filterPredication is not null)
+        {
+            return await DataContext.Books
+                .Where(filterPredication)
+                .CountAsync(token);
+        }
+
+        return await CountAsync(token);
+    }
+
     public override async Task<IEnumerable<Book>> GetAllPaginationAsync(int page = 1, int pageSize = 10,
         Func<IQueryable<Book>, IOrderedQueryable<Book>>? orderBy = null, CancellationToken token = default)
     {

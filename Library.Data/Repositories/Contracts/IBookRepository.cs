@@ -15,4 +15,6 @@ public interface IBookRepository : IRepository<Book>
         CancellationToken token = default);
 
     public Task<int> CountBorrowedUserBooksAsync(Guid userId, CancellationToken token = default);
+    
+    public Task<int> CountAsync(Expression<Func<Book, bool>>? filterPredication = null, CancellationToken token = default);
 }

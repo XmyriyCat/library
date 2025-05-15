@@ -41,8 +41,21 @@ services:
     networks:
       - dev_network
 
+  library.client:
+    container_name: library.client
+    build:
+      context: library.client/
+      dockerfile: Dockerfile
+    ports:
+      - "3000:80"
+    depends_on:
+      - db
+    networks:
+      - dev_network
+
 networks:
   dev_network:
+
 
 volumes:
   mssql_data:
