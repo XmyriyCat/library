@@ -125,7 +125,7 @@ public class BookService : IBookService
 
         response.Page = request.Page;
         response.PageSize = request.PageSize;
-        response.TotalItems = await _repositoryWrapper.Books.CountAsync(token);
+        response.TotalItems = await _repositoryWrapper.Books.CountAsync(filterPredication, token);
 
         return response;
     }
