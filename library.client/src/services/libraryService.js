@@ -7,6 +7,12 @@ export const fetchBooks = async ({ page = 1, pageSize = 6, title = "", genre = "
   return response.data;
 };
 
+export const fetchAuthorBooks = async (authorId) => {
+  const url = ApiEndpoints.Author.GetBooks(authorId);
+  const response = await axios.get(url);
+  return response;
+};
+
 export const fetchAuthors = async ({ page = 1, pageSize = 6 }) => {
   const response = await axios.get(ApiEndpoints.Author.GetAll(page, pageSize));
   return response.data;
@@ -117,6 +123,19 @@ export const deleteAuthor = async (id) => {
         "Content-Type": "application/json"
       },
     });
+
+  return response.data;
+};
+
+export const getBorrowedBooks = async () => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.get(ApiEndpoints.UserBook.GetAll, {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+  });
 
   return response.data;
 };

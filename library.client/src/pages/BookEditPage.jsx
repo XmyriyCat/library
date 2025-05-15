@@ -14,6 +14,7 @@ export default function BookDetails() {
     const [imageFile, setImageFile] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [pageMode, setPageMode] = useState("create");
+    const [validationErrors, setValidationErrors] = useState({});
     const navigate = useNavigate();
     const { enqueueSnackbar } = useSnackbar();
 
@@ -31,7 +32,7 @@ export default function BookDetails() {
                         setImage(URL.createObjectURL(blob));
                     }
                 }
-                const recievedAuthors = await fetchAuthors()
+                const recievedAuthors = await fetchAuthors({ page: 1, pageSize: 30 })
                 setAuthors(recievedAuthors.items)
             } catch (err) {
                 console.error("Error loading book details:", err);
@@ -51,6 +52,31 @@ export default function BookDetails() {
 
     const handleUpdateBook = async (e) => {
         e.preventDefault();
+        const errors = {};
+
+        if (!book.isbn || book.isbn.length < 10 || book.isbn.length > 20) {
+            errors.isbn = "ISBN must be between 10 and 20 characters.";
+        }
+        if (!book.title || book.title.length > 50) {
+            errors.title = "Title is required and must be less than 50 characters.";
+        }
+        if (!book.genre || book.genre.length > 30) {
+            errors.genre = "Genre is required and must be less than 30 characters.";
+        }
+        if (!book.description || book.description.length > 300) {
+            errors.description = "Description is required and must be less than 300 characters.";
+        }
+        if (!book.author || !book.author.id) {
+            errors.author = "Author selection is required.";
+        }
+        if (!imageFile && !imageBlob) {
+            errors.image = "Book image is required.";
+        }
+
+        setValidationErrors(errors);
+        if (Object.keys(errors).length > 0) {
+            return;
+        }
 
         try {
             const formData = new FormData();
@@ -58,7 +84,7 @@ export default function BookDetails() {
             formData.append("isbn", book.isbn);
             formData.append("genre", book.genre);
             formData.append("description", book.description);
-            formData.append("authorId", book.author?.id || "");
+            formData.append("authorId", book.author.id);
 
             if (imageFile) {
                 formData.append("image", imageFile);
@@ -70,19 +96,18 @@ export default function BookDetails() {
                 await updateBook(book.id, formData);
                 enqueueSnackbar("Book updated successfully!", { variant: "success" });
                 navigate(`/books/${book.id}`);
-            } else if (pageMode === "create") {
+            } else {
                 const response = await createBook(formData);
                 if (response && response.id) {
                     enqueueSnackbar("Book created successfully!", { variant: "success" });
                     navigate(`/books/${response.id}`);
                 } else {
-                    console.error("Book creation failed or returned no ID", response);
                     enqueueSnackbar("Book creation failed.", { variant: "error" });
                 }
             }
         } catch (error) {
             console.error("Error processing book:", error);
-            alert("Fail! Something went wrong...");
+            enqueueSnackbar("Fail! Something went wrong...", { variant: "error" });
         }
     };
 
@@ -96,7 +121,7 @@ export default function BookDetails() {
                 <div className="col-md-8">
                     <div className="card shadow">
                         <div className="card-header bg-primary text-white">
-                        <h4>{pageMode === "update" ? "Edit Book Details" : "Create New Book"}</h4>
+                            <h4>{pageMode === "update" ? "Edit Book Details" : "Create New Book"}</h4>
                         </div>
                         <div className="card-body">
                             <form onSubmit={handleUpdateBook}>
@@ -104,11 +129,13 @@ export default function BookDetails() {
                                     <label className="form-label">Title</label>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className={`form-control ${validationErrors.title ? 'is-invalid' : ''}`}
                                         value={book.title || ""}
                                         onChange={(e) => setBook({ ...book, title: e.target.value })}
                                     />
+                                    {validationErrors.title && <div className="text-danger mt-1">{validationErrors.title}</div>}
                                 </div>
+
                                 {image && typeof image === "string" && (
                                     <div className="mb-3 text-center">
                                         <img
@@ -119,11 +146,12 @@ export default function BookDetails() {
                                         />
                                     </div>
                                 )}
+
                                 <div className="mb-3">
                                     <label className="form-label">Upload New Image</label>
                                     <input
                                         type="file"
-                                        className="form-control"
+                                        className={`form-control ${validationErrors.image ? 'is-invalid' : ''}`}
                                         accept="image/*"
                                         onChange={(e) => {
                                             const file = e.target.files[0];
@@ -138,38 +166,46 @@ export default function BookDetails() {
                                             }
                                         }}
                                     />
+                                    {validationErrors.image && <div className="text-danger mt-1">{validationErrors.image}</div>}
                                 </div>
+
                                 <div className="mb-3">
                                     <label className="form-label">ISBN</label>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className={`form-control ${validationErrors.isbn ? 'is-invalid' : ''}`}
                                         value={book.isbn || ""}
                                         onChange={(e) => setBook({ ...book, isbn: e.target.value })}
                                     />
+                                    {validationErrors.isbn && <div className="text-danger mt-1">{validationErrors.isbn}</div>}
                                 </div>
+
                                 <div className="mb-3">
                                     <label className="form-label">Genre</label>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className={`form-control ${validationErrors.genre ? 'is-invalid' : ''}`}
                                         value={book.genre || ""}
                                         onChange={(e) => setBook({ ...book, genre: e.target.value })}
                                     />
+                                    {validationErrors.genre && <div className="text-danger mt-1">{validationErrors.genre}</div>}
                                 </div>
+
                                 <div className="mb-3">
                                     <label className="form-label">Description</label>
                                     <textarea
-                                        className="form-control"
+                                        className={`form-control ${validationErrors.description ? 'is-invalid' : ''}`}
                                         rows="3"
                                         value={book.description || ""}
                                         onChange={(e) => setBook({ ...book, description: e.target.value })}
                                     ></textarea>
+                                    {validationErrors.description && <div className="text-danger mt-1">{validationErrors.description}</div>}
                                 </div>
+
                                 <div className="mb-3">
                                     <label className="form-label">Author</label>
                                     <select
-                                        className="form-select"
+                                        className={`form-select ${validationErrors.author ? 'is-invalid' : ''}`}
                                         value={book.author?.id || ""}
                                         onChange={(e) => {
                                             const selectedAuthor = authors.find(a => a.id === e.target.value);
@@ -183,7 +219,9 @@ export default function BookDetails() {
                                             </option>
                                         ))}
                                     </select>
+                                    {validationErrors.author && <div className="text-danger mt-1">{validationErrors.author}</div>}
                                 </div>
+
                                 <div className="d-grid">
                                     <button type="submit" className="btn btn-primary">
                                         Save Changes

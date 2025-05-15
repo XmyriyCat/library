@@ -2,11 +2,13 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useSnackbar } from "notistack";
-import { fetchAuthorById, deleteAuthor } from "../services/libraryService";
+import { fetchAuthorById, deleteAuthor, fetchAuthorBooks } from "../services/libraryService";
 
 export default function AuthorDetails() {
   const { id } = useParams();
   const [author, setAuthor] = useState({});
+  const [books, setBooks] = useState([]);
+  const [showBooks, setShowBooks] = useState(false);
   const [userRole, setUserRole] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const navigate = useNavigate();
@@ -28,12 +30,24 @@ export default function AuthorDetails() {
       const roles = decoded.role || [];
       setUserRole(
         roles.includes("admin") ? "admin" :
-        roles.includes("manager") ? "manager" : "user"
+          roles.includes("manager") ? "manager" : "user"
       );
     }
 
     loadAuthor();
   }, [id]);
+
+  const toggleBooks = async () => {
+    if (!showBooks) {
+      try {
+        const response = await fetchAuthorBooks(id);
+        setBooks(response.data);
+      } catch (error) {
+        console.error("Error fetching author's books:", error);
+      }
+    }
+    setShowBooks(!showBooks);
+  };
 
   const confirmDelete = async () => {
     try {
@@ -63,7 +77,8 @@ export default function AuthorDetails() {
                 <strong>Date of Birth:</strong>{" "}
                 {author.dateOfBirth ? new Date(author.dateOfBirth).toLocaleDateString() : "N/A"}
               </p>
-              <div className="d-flex gap-2 flex-wrap">
+
+              <div className="d-flex gap-2 flex-wrap mb-3">
                 {(userRole === "admin" || userRole === "manager") && (
                   <Link to={`/authors/${author.id}/edit`} className="btn btn-primary">
                     Edit Author
@@ -74,10 +89,41 @@ export default function AuthorDetails() {
                     Delete Author
                   </button>
                 )}
+                <button className="btn btn-warning" onClick={toggleBooks}>
+                  {showBooks ? "Hide Books" : "Author Books"}
+                </button>
                 <Link to="/dashboard?view=authors" className="btn btn-secondary ms-auto">
                   Back to Dashboard
                 </Link>
               </div>
+
+              {showBooks && (
+                <div className="row mt-4">
+                  {books.length === 0 ? (
+                    <p className="text-muted">No books found for this author.</p>
+                  ) : (
+                    books.map((book) => (
+                      <div key={book.id} className="col-md-6 mb-3">
+                        <div className="card h-100 shadow-sm">
+                          <img
+                            src={`http://localhost:8080/api/books/${book.id}/image`}
+                            className="card-img-top"
+                            alt={book.title}
+                            style={{ height: "200px", objectFit: "cover" }}
+                          />
+                          <div className="card-body">
+                            <h5 className="card-title">{book.title}</h5>
+                            <p className="card-text text-muted">{book.genre}</p>
+                            <Link to={`/books/${book.id}`} className="btn btn-outline-primary w-100">
+                              View Details
+                            </Link>
+                          </div>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>

@@ -29,6 +29,12 @@ const BooksView = ({ books }) => {
       {books.map((book) => (
         <div key={book.id} className="col">
           <div className="card h-100 shadow-sm">
+            <img
+              src={`http://localhost:8080/api/books/${book.id}/image`}
+              className="card-img-top"
+              alt={book.title}
+              style={{ height: "200px", objectFit: "cover" }}
+            />
             <div className="card-body d-flex flex-column">
               <h5 className="card-title text-primary">{book.title}</h5>
               <p className="card-text">
@@ -38,7 +44,9 @@ const BooksView = ({ books }) => {
               </p>
               {book.bookOwner !== null ? (
                 <p className="text-danger fw-semibold">Currently Taken</p>
-              ) : (<p className="text-success fw-semibold">Available</p>)}
+              ) : (
+                <p className="text-success fw-semibold">Available</p>
+              )}
               <div className="mt-auto">
                 <Link to={`/books/${book.id}`} className="btn btn-outline-primary w-100">
                   View Details

@@ -7,6 +7,7 @@ import { useSnackbar } from "notistack";
 export default function AuthorEditPage() {
     const { id } = useParams();
     const [author, setAuthor] = useState({});
+    const [errors, setErrors] = useState({});
     const [userRole, setUserRole] = useState(null);
     const [isLoading, setIsLoading] = useState(true);
     const [pageMode, setPageMode] = useState("create");
@@ -37,8 +38,25 @@ export default function AuthorEditPage() {
         }
     }, [id]);
 
+    const validate = () => {
+        const newErrors = {};
+        if (!author.name || author.name.trim() === "") {
+            newErrors.name = "Name is required.";
+        }
+        if (!author.country || author.country.trim() === "") {
+            newErrors.country = "Country is required.";
+        }
+        if (!author.dateOfBirth || author.dateOfBirth.trim() === "") {
+            newErrors.dateOfBirth = "Date of Birth is required.";
+        }
+        setErrors(newErrors);
+        return Object.keys(newErrors).length === 0;
+    };
+
     const handleUpdateAuthor = async (e) => {
         e.preventDefault();
+        if (!validate()) return;
+
         try {
             const authorPayload = {
                 name: author.name,
@@ -84,32 +102,38 @@ export default function AuthorEditPage() {
                                     <label className="form-label">Name</label>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className={`form-control ${errors.name ? "is-invalid" : ""}`}
                                         value={author.name || ""}
                                         onChange={(e) => setAuthor({ ...author, name: e.target.value })}
                                     />
+                                    {errors.name && <div className="invalid-feedback">{errors.name}</div>}
                                 </div>
+
                                 <div className="mb-3">
                                     <label className="form-label">Country</label>
                                     <input
                                         type="text"
-                                        className="form-control"
+                                        className={`form-control ${errors.country ? "is-invalid" : ""}`}
                                         value={author.country || ""}
                                         onChange={(e) => setAuthor({ ...author, country: e.target.value })}
                                     />
+                                    {errors.country && <div className="invalid-feedback">{errors.country}</div>}
                                 </div>
+
                                 <div className="mb-3">
                                     <label className="form-label">Date of Birth</label>
                                     <input
                                         type="date"
-                                        className="form-control"
+                                        className={`form-control ${errors.dateOfBirth ? "is-invalid" : ""}`}
                                         value={author.dateOfBirth ? new Date(author.dateOfBirth).toISOString().split("T")[0] : ""}
                                         onChange={(e) => {
                                             const isoDate = new Date(e.target.value).toISOString();
                                             setAuthor({ ...author, dateOfBirth: isoDate });
                                         }}
                                     />
+                                    {errors.dateOfBirth && <div className="invalid-feedback">{errors.dateOfBirth}</div>}
                                 </div>
+
                                 <div className="d-grid">
                                     <button type="submit" className="btn btn-primary">
                                         {pageMode === "update" ? "Save Changes" : "Create Author"}
