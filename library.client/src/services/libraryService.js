@@ -139,3 +139,16 @@ export const getBorrowedBooks = async () => {
 
   return response.data;
 };
+
+export const deleteBorrowedBooks = async (id) => {
+  const accessToken = localStorage.getItem("accessToken");
+
+  const response = await axios.delete(ApiEndpoints.UserBook.Delete(id), {
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
+  });
+
+  return response;
+};

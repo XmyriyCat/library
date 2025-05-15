@@ -13,12 +13,10 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [userRole, setUserRole] = useState(null);
 
-    // Form input values (not used for filtering directly)
     const [inputTitle, setInputTitle] = useState("");
     const [inputGenre, setInputGenre] = useState("");
     const [inputAuthor, setInputAuthor] = useState("");
 
-    // Actual applied filter values
     const [title, setTitle] = useState("");
     const [genre, setGenre] = useState("");
     const [author, setAuthor] = useState("");
@@ -135,17 +133,14 @@ const Dashboard = () => {
                     <button
                         className="btn btn-danger"
                         onClick={() => {
-                            // Clear form fields
                             setInputTitle("");
                             setInputGenre("");
                             setInputAuthor("");
 
-                            // Clear applied filters
                             setTitle("");
                             setGenre("");
                             setAuthor("");
 
-                            // Reset page and update URL
                             setPage(1);
                             setSearchParams((prev) => {
                                 const newParams = new URLSearchParams(prev);

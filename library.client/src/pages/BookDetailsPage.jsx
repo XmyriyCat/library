@@ -59,7 +59,7 @@ export default function BookDetails() {
 
       if (result && result.returnDate) {
         const returnDate = new Date(result.returnDate).toLocaleDateString();
-        alert(`Book taken successfully! Please return it by ${returnDate}.`);
+        enqueueSnackbar(`Book taken successfully! Please return it by ${returnDate}.`, { variant: "success" });
         const updatedBook = await fetchBookById(bookId);
         setBook(updatedBook);
       }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { Link } from "react-router-dom";
+import ApiEndpoints from "../api/ApiEndpoints";
 
 const BooksView = ({ books }) => {
   const [userRole, setUserRole] = useState(null);
@@ -30,7 +31,7 @@ const BooksView = ({ books }) => {
         <div key={book.id} className="col">
           <div className="card h-100 shadow-sm">
             <img
-              src={`http://localhost:8080/api/books/${book.id}/image`}
+              src={ApiEndpoints.Book.GetImage(book.id)}
               className="card-img-top"
               alt={book.title}
               style={{ height: "200px", objectFit: "cover" }}

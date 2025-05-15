@@ -3,6 +3,7 @@ import { useState, useEffect } from "react";
 import { jwtDecode } from "jwt-decode";
 import { useSnackbar } from "notistack";
 import { fetchAuthorById, deleteAuthor, fetchAuthorBooks } from "../services/libraryService";
+import ApiEndpoints from "../api/ApiEndpoints";
 
 export default function AuthorDetails() {
   const { id } = useParams();
@@ -106,7 +107,7 @@ export default function AuthorDetails() {
                       <div key={book.id} className="col-md-6 mb-3">
                         <div className="card h-100 shadow-sm">
                           <img
-                            src={`http://localhost:8080/api/books/${book.id}/image`}
+                            src={ApiEndpoints.Book.GetImage(book.id)}
                             className="card-img-top"
                             alt={book.title}
                             style={{ height: "200px", objectFit: "cover" }}
