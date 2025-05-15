@@ -94,11 +94,6 @@ const Navbar = () => {
                             </>
                         ) : (
                             <>
-                                <li className="nav-item d-flex align-items-center me-3">
-                                    <span className="nav-link text-light disabled">
-                                        {username}
-                                    </span>
-                                </li>
                                 <li className="nav-item">
                                     <button className="btn nav-link text-light" onClick={handleLogout}>
                                         Logout
@@ -106,7 +101,7 @@ const Navbar = () => {
                                 </li>
                                 <li className="nav-item">
                                     <Link className="nav-link text-light" to="/me">
-                                        Me
+                                        {username}
                                     </Link>
                                 </li>
                             </>
