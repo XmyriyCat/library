@@ -96,7 +96,7 @@ export default function BookDetails() {
                 <div className="col-md-8">
                     <div className="card shadow">
                         <div className="card-header bg-primary text-white">
-                            <h4>Edit Book Details</h4>
+                        <h4>{pageMode === "update" ? "Edit Book Details" : "Create New Book"}</h4>
                         </div>
                         <div className="card-body">
                             <form onSubmit={handleUpdateBook}>

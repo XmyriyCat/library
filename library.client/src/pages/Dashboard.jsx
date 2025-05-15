@@ -13,12 +13,33 @@ const Dashboard = () => {
     const [loading, setLoading] = useState(false);
     const [userRole, setUserRole] = useState(null);
 
+    // Form input values (not used for filtering directly)
+    const [inputTitle, setInputTitle] = useState("");
+    const [inputGenre, setInputGenre] = useState("");
+    const [inputAuthor, setInputAuthor] = useState("");
+
+    // Actual applied filter values
+    const [title, setTitle] = useState("");
+    const [genre, setGenre] = useState("");
+    const [author, setAuthor] = useState("");
+
+    const initialPage = parseInt(searchParams.get("page")) || 1;
+    const [page, setPage] = useState(initialPage);
+    const [pageSize] = useState(6);
+    const [totalPages, setTotalPages] = useState(1);
+
     useEffect(() => {
         const loadData = async () => {
             setLoading(true);
             try {
-                const result = view === "books" ? await fetchBooks() : await fetchAuthors();
+                const result = view === "books"
+                    ? await fetchBooks({ page, pageSize, title, genre, author })
+                    : await fetchAuthors({ page, pageSize });
+
                 setData(result.items || result);
+
+                const totalItems = result.totalItems || 0;
+                setTotalPages(Math.max(1, Math.ceil(totalItems / pageSize)));
             } catch (error) {
                 console.error("Failed to fetch data", error);
             } finally {
@@ -39,7 +60,20 @@ const Dashboard = () => {
             }
         };
         loadData();
-    }, [view]);
+    }, [view, page, title, genre, author]);
+
+    const handleApplyFilters = () => {
+        setTitle(inputTitle);
+        setGenre(inputGenre);
+        setAuthor(inputAuthor);
+        setPage(1);
+        setSearchParams((prev) => {
+            const newParams = new URLSearchParams(prev);
+            newParams.set("page", 1);
+            newParams.set("view", view);
+            return newParams;
+        });
+    };
 
     const handleCreate = () => {
         navigate(`/${view}/create`);
@@ -72,6 +106,61 @@ const Dashboard = () => {
                 </div>
             </div>
 
+            {view === "books" && (
+                <div className="mb-4 d-flex flex-wrap gap-2 justify-content-center">
+                    <input
+                        type="text"
+                        placeholder="Search by title"
+                        value={inputTitle}
+                        onChange={(e) => setInputTitle(e.target.value)}
+                        className="form-control w-auto"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Filter by genre"
+                        value={inputGenre}
+                        onChange={(e) => setInputGenre(e.target.value)}
+                        className="form-control w-auto"
+                    />
+                    <input
+                        type="text"
+                        placeholder="Filter by author"
+                        value={inputAuthor}
+                        onChange={(e) => setInputAuthor(e.target.value)}
+                        className="form-control w-auto"
+                    />
+                    <button className="btn btn-primary" onClick={handleApplyFilters}>
+                        Apply Filters
+                    </button>
+                    <button
+                        className="btn btn-danger"
+                        onClick={() => {
+                            // Clear form fields
+                            setInputTitle("");
+                            setInputGenre("");
+                            setInputAuthor("");
+
+                            // Clear applied filters
+                            setTitle("");
+                            setGenre("");
+                            setAuthor("");
+
+                            // Reset page and update URL
+                            setPage(1);
+                            setSearchParams((prev) => {
+                                const newParams = new URLSearchParams(prev);
+                                newParams.set("page", 1);
+                                newParams.set("view", view);
+                                return newParams;
+                            });
+                        }}
+                    >
+                        Clear
+                    </button>
+                </div>
+            )}
+
+
             {loading ? (
                 <div className="text-center">
                     <div className="spinner-border text-primary" role="status" />
@@ -80,6 +169,33 @@ const Dashboard = () => {
                 <BooksView books={data} />
             ) : (
                 <AuthorsView authors={data} />
+            )}
+
+            {totalPages > 1 && (
+                <div className="d-flex justify-content-center mt-4">
+                    <nav>
+                        <ul className="pagination">
+                            {[...Array(totalPages)].map((_, i) => (
+                                <li key={i} className={`page-item ${page === i + 1 ? "active" : ""}`}>
+                                    <button
+                                        className="page-link"
+                                        onClick={() => {
+                                            setPage(i + 1);
+                                            setSearchParams((prev) => {
+                                                const newParams = new URLSearchParams(prev);
+                                                newParams.set("page", i + 1);
+                                                newParams.set("view", view);
+                                                return newParams;
+                                            });
+                                        }}
+                                    >
+                                        {i + 1}
+                                    </button>
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                </div>
             )}
         </div>
     );

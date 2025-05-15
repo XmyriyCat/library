@@ -33,7 +33,8 @@ const BooksView = ({ books }) => {
               <h5 className="card-title text-primary">{book.title}</h5>
               <p className="card-text">
                 <strong>Genre:</strong> {book.genre}<br />
-                <strong>ISBN:</strong> {book.isbn}
+                <strong>ISBN:</strong> {book.isbn}<br />
+                <strong>Author:</strong> {book.author?.name}
               </p>
               {book.bookOwner !== null ? (
                 <p className="text-danger fw-semibold">Currently Taken</p>

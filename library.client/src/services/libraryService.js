@@ -1,13 +1,14 @@
 import axios from "../api/axiosInstance";
 import ApiEndpoints from "../api/ApiEndpoints";
 
-export const fetchBooks = async () => {
-  const response = await axios.get(ApiEndpoints.Book.GetAll);
+export const fetchBooks = async ({ page = 1, pageSize = 6, title = "", genre = "", author = "" }) => {
+  const url = ApiEndpoints.Book.GetAll(page, pageSize, title, genre, author);
+  const response = await axios.get(url);
   return response.data;
 };
 
-export const fetchAuthors = async () => {
-  const response = await axios.get(ApiEndpoints.Author.GetAll);
+export const fetchAuthors = async ({ page = 1, pageSize = 6 }) => {
+  const response = await axios.get(ApiEndpoints.Author.GetAll(page, pageSize));
   return response.data;
 };
 
@@ -84,10 +85,10 @@ export const updateAuthor = async (id, data) => {
   const accessToken = localStorage.getItem("accessToken");
 
   const response = await axios.put(ApiEndpoints.Author.Update(id), data, {
-      headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-      },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
   });
 
   return response.data;
@@ -97,10 +98,10 @@ export const createAuthor = async (data) => {
   const accessToken = localStorage.getItem("accessToken");
 
   const response = await axios.post(ApiEndpoints.Author.Create, data, {
-      headers: {
-          Authorization: `Bearer ${accessToken}`,
-          "Content-Type": "application/json"
-      },
+    headers: {
+      Authorization: `Bearer ${accessToken}`,
+      "Content-Type": "application/json"
+    },
   });
 
   return response.data;
