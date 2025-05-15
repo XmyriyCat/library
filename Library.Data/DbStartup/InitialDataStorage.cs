@@ -240,8 +240,8 @@ namespace Library.Data.DbStartup
                 {
                     BookId = BookGuidList[2],
                     UserId = UserGuidList[0],
-                    TakenDate = DateTime.UtcNow.AddDays(-1),
-                    ReturnDate = DateTime.UtcNow.AddDays(5)
+                    TakenDate = DateTime.UtcNow.AddMonths(-10),
+                    ReturnDate = DateTime.UtcNow.AddMonths(-5)
                 },
                 new UserBook
                 {
