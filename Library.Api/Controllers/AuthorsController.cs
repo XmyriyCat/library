@@ -11,10 +11,12 @@ namespace Library.Api.Controllers;
 public class AuthorsController : ControllerBase
 {
     private readonly IAuthorService _authorService;
+    private readonly ILogger<AuthorsController> _logger;
 
-    public AuthorsController(IAuthorService authorService)
+    public AuthorsController(IAuthorService authorService, ILogger<AuthorsController> logger)
     {
         _authorService = authorService;
+        _logger = logger;
     }
 
     [Authorize(AuthConstants.ManagerPolicyName)]
@@ -23,6 +25,8 @@ public class AuthorsController : ControllerBase
     {
         var response = await _authorService.CreateAsync(request, token);
 
+        _logger.LogInformation("Author created successfully. AuthorId: {AuthorId}, Name: {AuthorName}", response.Id, response.Name);
+        
         return CreatedAtAction(nameof(Get), new { Id = response.Id }, response);
     }
 
@@ -32,7 +36,16 @@ public class AuthorsController : ControllerBase
     {
         var response = await _authorService.GetByIdAsync(id, token);
 
-        return response is null ? NotFound() : Ok(response);
+        if (response is null)
+        {
+            _logger.LogInformation("Author not found. AuthorId: {AuthorId}", id);
+            
+            return NotFound();
+        }
+
+        _logger.LogInformation("Author retrieved successfully. AuthorId: {AuthorId}", id);
+        
+        return Ok(response);
     }
 
     [AllowAnonymous]
