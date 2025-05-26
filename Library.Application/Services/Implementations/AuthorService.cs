@@ -35,8 +35,6 @@ public class AuthorService : IAuthorService
 
         var createdAuthor = await _repositoryWrapper.Authors.CreateAsync(author, token);
 
-        await _repositoryWrapper.SaveChangesAsync(token);
-
         var response = _mapper.Map<AuthorResponse>(createdAuthor);
 
         return response;

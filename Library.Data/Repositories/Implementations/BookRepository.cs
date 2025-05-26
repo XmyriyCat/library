@@ -17,6 +17,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
         var result = await DataContext.Books
             .Include(x => x.Author)
             .Include(x => x.UserBook)
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Id == id, token);
 
         return result;
@@ -27,6 +28,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
         return await DataContext.Books
             .Include(x => x.Author)
             .Include(x => x.UserBook)
+            .AsNoTrackingWithIdentityResolution()
             .ToListAsync(token);
     }
 
@@ -35,6 +37,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
         var result = await DataContext.Books
             .Include(x => x.Author)
             .Include(x => x.UserBook)
+            .AsNoTracking()
             .FirstOrDefaultAsync(x => x.Isbn.ToLower() == isbn.ToLower(), token);
 
         return result;
@@ -75,7 +78,9 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
                 .Take(pageSize);
         }
 
-        return await itemsQuery.ToListAsync(token);
+        return await itemsQuery
+            .AsNoTrackingWithIdentityResolution()
+            .ToListAsync(token);
     }
 
     public async Task<IEnumerable<Book>> GetAllBorrowedBooksAsync(Guid userId, int page = 1, int pageSize = 10,
@@ -88,6 +93,7 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
             .ThenInclude(x => x.User)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
+            .AsNoTrackingWithIdentityResolution()
             .ToListAsync(token);
     }
 
@@ -135,6 +141,8 @@ public class BookRepository : GenericRepository<Book>, IBookRepository
             orderBy(itemsQuery);
         }
 
-        return await itemsQuery.ToListAsync(token);
+        return await itemsQuery
+            .AsNoTrackingWithIdentityResolution()
+            .ToListAsync(token);
     }
 }

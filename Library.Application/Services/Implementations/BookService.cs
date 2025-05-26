@@ -63,8 +63,6 @@ public class BookService : IBookService
 
         await UploadImageAsync(request.Image, createdBook.Id, token);
 
-        await _repositoryWrapper.SaveChangesAsync(token);
-
         var response = _mapper.Map<BookResponse>(createdBook);
 
         return response;

@@ -18,6 +18,8 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
         await using var transaction = await DataContext.Database.BeginTransactionAsync(token);
 
         var result = await DataContext.Set<T>().AddAsync(item, token);
+        
+        await DataContext.SaveChangesAsync(token);
 
         await transaction.CommitAsync(token);
 
@@ -26,12 +28,21 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
 
     public virtual async Task<T?> GetByIdAsync(Guid id, CancellationToken token = default)
     {
-        return await DataContext.Set<T>().FindAsync([id], token);
+        var item = await GetByIdTrackedAsync(id, token);
+        
+        if (item is not null)
+        {
+            DataContext.Entry(item).State = EntityState.Detached;
+        }
+
+        return item;
     }
 
     public virtual async Task<IEnumerable<T>> GetAllAsync(CancellationToken token = default)
     {
-        return await DataContext.Set<T>().ToListAsync(token);
+        return await DataContext.Set<T>()
+            .AsNoTracking()
+            .ToListAsync(token);
     }
 
     public virtual async Task<IEnumerable<T>> GetAllPaginationAsync(int page = 1, int pageSize = 10, 
@@ -56,7 +67,9 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
             orderBy(itemsQuery);
         }
 
-        return await itemsQuery.ToListAsync(token);
+        return await itemsQuery
+            .AsNoTrackingWithIdentityResolution()
+            .ToListAsync(token);
     }
 
     public virtual async Task<T> UpdateAsync(T item, CancellationToken token = default)
@@ -74,7 +87,7 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
     {
         await using var transaction = await DataContext.Database.BeginTransactionAsync(token);
 
-        var item = await GetByIdAsync(id, token);
+        var item = await GetByIdTrackedAsync(id, token);
 
         if (item is null)
         {
@@ -96,5 +109,10 @@ public abstract class GenericRepository<T> : IRepository<T> where T : class
     public virtual async Task<bool> AnyAsync(Expression<Func<T, bool>> predicate, CancellationToken token = default)
     {
         return await DataContext.Set<T>().AnyAsync(predicate, token);
+    }
+    
+    private async Task<T?> GetByIdTrackedAsync(Guid id, CancellationToken token = default)
+    {
+        return await DataContext.Set<T>().FindAsync([id], token);
     }
 }

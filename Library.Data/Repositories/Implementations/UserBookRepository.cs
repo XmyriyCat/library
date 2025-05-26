@@ -15,9 +15,11 @@ public class UserBookRepository : IUserBookRepository
 
     public async Task<UserBook?> GetAsync(Guid userId, Guid bookId, CancellationToken token = default)
     {
-        var userBook = await _dataContext.UserBooks.FirstOrDefaultAsync(x =>
-            x.UserId == userId &&
-            x.BookId == bookId, token);
+        var userBook = await _dataContext.UserBooks
+            .AsNoTracking()
+            .FirstOrDefaultAsync(x =>
+                x.UserId == userId &&
+                x.BookId == bookId, token);
 
         return userBook;
     }
@@ -39,19 +41,28 @@ public class UserBookRepository : IUserBookRepository
     {
         await using var transaction = await _dataContext.Database.BeginTransactionAsync(token);
 
-        var storedUserBook = await GetAsync(userBook.UserId, userBook.BookId, token);
+        var storedUserBook = await GetTrackingAsync(userBook.UserId, userBook.BookId, token);
 
         if (storedUserBook is null)
         {
             return false;
         }
 
-        var result = _dataContext.UserBooks.Remove(storedUserBook);
+        var item = _dataContext.UserBooks.Remove(storedUserBook);
 
         await transaction.CommitAsync(token);
 
         await _dataContext.SaveChangesAsync(token);
 
-        return true;
+        return item.State is EntityState.Deleted;
+    }
+
+    private async Task<UserBook?> GetTrackingAsync(Guid userId, Guid bookId, CancellationToken token = default)
+    {
+        var userBook = await _dataContext.UserBooks.FirstOrDefaultAsync(x =>
+            x.UserId == userId &&
+            x.BookId == bookId, token);
+
+        return userBook;
     }
 }
