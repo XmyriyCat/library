@@ -9,7 +9,6 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
 
-        // Add services to the container.
         builder.Services.AddAuthorization();
 
         builder.Services.ConfigureMsSqlContext(builder.Configuration);
@@ -27,7 +26,6 @@ public class Program
 
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
-        //builder.WebHost.UseUrls("http://+:80");
         
         var app = builder.Build();
 
@@ -35,7 +33,6 @@ public class Program
         await app.InitializeDbAsync();
         app.UseGlobalExceptionHandler();
 
-        // Configure the HTTP request pipeline.
         if (app.Environment.IsDevelopment())
         {
             app.MapOpenApi();

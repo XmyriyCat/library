@@ -13,7 +13,6 @@ public static class MappingProfile
 {
     public static void Configure()
     {
-        // Configure Author profiles
         TypeAdapterConfig<CreateAuthorRequest, Author>.NewConfig()
             .Map(dest => dest.Name, src => src.Name)
             .Map(dest => dest.Country, src => src.Country)
@@ -33,7 +32,6 @@ public static class MappingProfile
         TypeAdapterConfig<IEnumerable<Author>, AuthorsResponse>.NewConfig()
             .Map(dest => dest.Items, src => src.Select(x => x.Adapt<AuthorResponse>()));
 
-        // Configure Book profiles
         TypeAdapterConfig<Book, BookResponse>.NewConfig()
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.Isbn, src => src.Isbn)
@@ -66,16 +64,13 @@ public static class MappingProfile
         TypeAdapterConfig<IEnumerable<Book>, BooksResponse>.NewConfig()
             .Map(dest => dest.Items, src => src.Select(x => x.Adapt<BookResponse>()));
 
-        // Configure GetAllBooksOptions profiles
         TypeAdapterConfig<BooksRequest, GetAllBooksOptions>.NewConfig();
 
-        // Configure User profiles
         TypeAdapterConfig<User, UserResponse>.NewConfig()
             .Map(dest => dest.Id, src => src.Id)
             .Map(dest => dest.UserName, src => src.UserName)
             .Map(dest => dest.Email, src => src.Email);
         
-        // Configure UserBook profiles
         TypeAdapterConfig<UserBook, UserBookResponse>.NewConfig();
     }
 }
