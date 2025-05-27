@@ -10,10 +10,12 @@ namespace Library.Api.Middlewares;
 public class GlobalExceptionHandler
 {
     private readonly RequestDelegate _next;
+    private readonly ILogger<GlobalExceptionHandler> _logger;
 
-    public GlobalExceptionHandler(RequestDelegate next)
+    public GlobalExceptionHandler(RequestDelegate next, ILogger<GlobalExceptionHandler> logger)
     {
         _next = next;
+        _logger = logger;
     }
 
     public async Task Invoke(HttpContext context)
@@ -78,6 +80,13 @@ public class GlobalExceptionHandler
                     response.StatusCode = (int)HttpStatusCode.InternalServerError;
                     break;
             }
+            
+            _logger.LogError(error,
+                "Unhandled exception for request {Method} {Path}: {Message} | StatusCode: {StatusCode}",
+                context.Request.Method,
+                context.Request.Path,
+                error.Message,
+                response.StatusCode);
 
             var result = JsonSerializer.Serialize(new
             {
