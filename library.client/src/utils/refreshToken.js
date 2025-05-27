@@ -1,7 +1,6 @@
 import axios from 'axios';
 import { ApiEndpoints } from '../api/ApiEndpoints';
 
-// Pass `navigate` from a React component (when using react-router-dom)
 const refreshToken = async (navigate) => {
   const token = localStorage.getItem('refreshToken');
   if (!token) {
@@ -28,7 +27,7 @@ const refreshToken = async (navigate) => {
     localStorage.removeItem('refreshToken');
 
     if (navigate) {
-      navigate('/login'); // Redirect to login page if refresh fails
+      navigate('/login');
     }
 
     throw error;

@@ -35,8 +35,6 @@ public class AuthorService : IAuthorService
 
         var createdAuthor = await _repositoryWrapper.Authors.CreateAsync(author, token);
 
-        await _repositoryWrapper.SaveChangesAsync(token);
-
         var response = _mapper.Map<AuthorResponse>(createdAuthor);
 
         return response;
@@ -45,26 +43,24 @@ public class AuthorService : IAuthorService
     public async Task<AuthorResponse?> GetByIdAsync(Guid id, CancellationToken token = default)
     {
         var result = await _repositoryWrapper.Authors.GetByIdAsync(id, token);
-
-        if (result is null)
+        
+        if (result is { } author)
         {
-            return null;
+            return _mapper.Map<AuthorResponse>(author);
         }
 
-        var response = _mapper.Map<AuthorResponse>(result);
-
-        return response;
+        return null;
     }
 
     public async Task<AuthorsResponse> GetAllAsync(PagedRequest request, CancellationToken token = default)
     {
         await _pagedRequestValidator.ValidateAndThrowAsync(request, token);
 
-        var result =
-            await _repositoryWrapper.Authors.GetAllPaginationAsync(request.Page, request.PageSize, token: token);
+        var result = await _repositoryWrapper.Authors
+            .GetAllPaginationAsync(request.Page, request.PageSize, token: token);
 
         var response = _mapper.Map<AuthorsResponse>(result);
-        
+
         response.Page = request.Page;
         response.PageSize = request.PageSize;
         response.TotalItems = await _repositoryWrapper.Authors.CountAsync(token);
@@ -81,7 +77,7 @@ public class AuthorService : IAuthorService
         await _authorValidator.ValidateAndThrowAsync(author, token);
 
         var result = await _repositoryWrapper.Authors.UpdateAsync(author, token);
-        
+
         await _repositoryWrapper.SaveChangesAsync(token);
 
         return _mapper.Map<AuthorResponse>(result);
@@ -90,9 +86,9 @@ public class AuthorService : IAuthorService
     public async Task<bool> DeleteByIdAsync(Guid id, CancellationToken token = default)
     {
         var result = await _repositoryWrapper.Authors.DeleteByIdAsync(id, token);
-        
+
         await _repositoryWrapper.SaveChangesAsync(token);
-        
+
         return result;
     }
 
@@ -109,7 +105,7 @@ public class AuthorService : IAuthorService
     public async Task<IEnumerable<BookResponse>> GetAllBooksAsync(Guid authorId, CancellationToken token = default)
     {
         var books = await _repositoryWrapper.Authors.GetAllBooksAsync(authorId, token);
-        
+
         var response = books.Select(x => _mapper.Map<BookResponse>(x));
 
         return response;

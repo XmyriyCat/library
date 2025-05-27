@@ -17,6 +17,7 @@ public class AuthorRepository : GenericRepository<Author>, IAuthorRepository
             .Include(x => x.UserBook)
             .ThenInclude(x => x.User)
             .Where(x => x.Author.Id == authorId)
+            .AsNoTrackingWithIdentityResolution()
             .ToListAsync(token);
     }
 }

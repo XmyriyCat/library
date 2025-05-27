@@ -12,15 +12,16 @@ public class RefreshTokenRepository : GenericRepository<RefreshToken>, IRefreshT
 
     public async Task<User?> GetUserByRefreshTokenAsync(string refreshToken, CancellationToken token = default)
     {
-        var storedRefreshToken = await DataContext.RefreshTokens
+        var storedToken = await DataContext.RefreshTokens
             .FirstOrDefaultAsync(x => x.Value == refreshToken, token);
 
-        if (storedRefreshToken is null)
+        if (storedToken is not { UserId: var userId })
         {
             return null;
         }
 
-        var user = await DataContext.Users.FirstOrDefaultAsync(x => x.Id == storedRefreshToken.UserId, token);
+        var user = await DataContext.Users
+            .FirstOrDefaultAsync(x => x.Id == userId, token);
 
         return user;
     }

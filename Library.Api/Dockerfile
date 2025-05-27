@@ -16,6 +16,9 @@ ENV Cache:CacheLifeTimeMinutes=60
 #Set book images path
 ENV RootDirectories:Books="/app/wwwroot/images/books"
 
+# Set environment variables for Logging
+ENV logging:SeqUri="http://library.seq:5341/ingest/otlp/v1/logs"
+
 FROM mcr.microsoft.com/dotnet/sdk:9.0 AS build
 ARG BUILD_CONFIGURATION=Release
 WORKDIR /src

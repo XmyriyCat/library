@@ -71,8 +71,6 @@ namespace Library.Tests
             _mapperMock.Setup(m => m.Map<Author>(It.IsAny<CreateAuthorRequest>())).Returns(author);
             _repositoryWrapperMock.Setup(r => r.Authors.CreateAsync(author, It.IsAny<CancellationToken>()))
                 .ReturnsAsync(createdAuthor);
-            _repositoryWrapperMock.Setup(r => r.SaveChangesAsync(It.IsAny<CancellationToken>()))
-                .Returns(Task.CompletedTask);
             _mapperMock.Setup(m => m.Map<AuthorResponse>(createdAuthor)).Returns(response);
 
             // Act

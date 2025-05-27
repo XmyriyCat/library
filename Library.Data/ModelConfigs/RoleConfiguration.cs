@@ -17,10 +17,6 @@ public class RoleConfiguration : IEntityTypeConfiguration<Role>
             .IsRequired()
             .HasMaxLength(50);
         
-        // builder.Property(x => x.Claim)
-        //     .IsRequired()
-        //     .HasMaxLength(50);
-
         builder.Property(x => x.NormalizedName)
             .HasMaxLength(50);
     }

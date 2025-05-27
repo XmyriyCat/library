@@ -25,8 +25,7 @@ public class IdentityDataContext : IdentityDbContext<User, Role, Guid, IdentityU
     {
         // When overriding OnModelCreating method, you should first call the base method implementation that the migration was created correctly
         base.OnModelCreating(modelBuilder);
-
-        // Configure all model configurations that implements interface IEntityTypeConfiguration<T> from Assembly
+        
         modelBuilder.ApplyConfigurationsFromAssembly(Assembly.GetExecutingAssembly());
     }
 }

@@ -63,8 +63,6 @@ public class BookService : IBookService
 
         await UploadImageAsync(request.Image, createdBook.Id, token);
 
-        await _repositoryWrapper.SaveChangesAsync(token);
-
         var response = _mapper.Map<BookResponse>(createdBook);
 
         return response;
@@ -81,12 +79,12 @@ public class BookService : IBookService
     {
         var result = await _repositoryWrapper.Books.GetByIdAsync(id, token);
 
-        if (result is null)
+        if (result is not { } book)
         {
             return null;
         }
 
-        var response = _mapper.Map<BookResponse>(result);
+        var response = _mapper.Map<BookResponse>(book);
 
         return response;
     }
@@ -95,12 +93,12 @@ public class BookService : IBookService
     {
         var result = await _repositoryWrapper.Books.GetByIsbnAsync(isbn, token);
 
-        if (result is null)
+        if (result is not { } book)
         {
             return null;
         }
 
-        var response = _mapper.Map<BookResponse>(result);
+        var response = _mapper.Map<BookResponse>(book);
 
         return response;
     }
@@ -138,7 +136,7 @@ public class BookService : IBookService
         {
             Expression<Func<Book, bool>> filterByGenre =
                 book => book.Genre.ToLower().Contains(options.Genre.ToLower());
-            
+
             combinedFilter = combinedFilter == null
                 ? filterByGenre
                 : combinedFilter.AndAlso(filterByGenre);
@@ -148,7 +146,7 @@ public class BookService : IBookService
         {
             Expression<Func<Book, bool>> filterByTitle =
                 book => book.Title.ToLower().Contains(options.Title.ToLower());
-            
+
             combinedFilter = combinedFilter == null
                 ? filterByTitle
                 : combinedFilter.AndAlso(filterByTitle);
@@ -158,7 +156,7 @@ public class BookService : IBookService
         {
             Expression<Func<Book, bool>> filterByAuthor =
                 book => book.Author.Name.ToLower().Contains(options.Author.ToLower());
-            
+
             combinedFilter = combinedFilter == null
                 ? filterByAuthor
                 : combinedFilter.AndAlso(filterByAuthor);
@@ -224,21 +222,19 @@ public class BookService : IBookService
 
     public async Task<ImageResult?> GetBookImageByIdOrIsbnAsync(string idOrIsbn, CancellationToken token = default)
     {
-        var book = await GetByIdOrIsbnAsync(idOrIsbn, token);
+        var result = await GetByIdOrIsbnAsync(idOrIsbn, token);
 
-        if (book is null)
+        if (result is not { ImageName: var imageName })
         {
             return null;
         }
 
-        var image = await GetImageAsync(book.ImageName, token);
-
-        return image;
+        return await GetImageAsync(imageName, token);
     }
 
     private async Task UploadImageAsync(IFormFile image, Guid fileId, CancellationToken token = default)
     {
-        if (image is null || image.Length == 0)
+        if (image is null or { Length: 0 })
         {
             throw new WrongImageException("Your image is empty.");
         }
