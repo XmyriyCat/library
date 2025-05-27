@@ -86,6 +86,10 @@ a59561f32ab6   modsenlibrary-library.client            "/docker-entrypoint.…" 
 ```
 http://localhost:3000/dashboard
 ```
+6. Для просмотра логов приложения необходимо открыть Seq страницу
+```
+http://localhost:8081
+```
 ## Демонстрация работы приложения
 1. После запуска веб-приложения пользователь попадает на главную страницу. Обратите внимаение, что пользователь не авторизован. Пользователю доступен поиск книг по заголовку & жанру & автору.
    ![Screenshot1](https://github.com/XmyriyCat/library/blob/feature/readme.images/Screenshot1.png)
