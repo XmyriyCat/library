@@ -24,6 +24,8 @@ public class Program
             .ConfigureJwtAuthorization()
             .ConfigureCors();
 
+        builder.Logging.ConfigureLogging(builder);
+
         builder.Services.AddControllers();
         builder.Services.AddOpenApi();
         

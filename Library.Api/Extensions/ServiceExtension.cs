@@ -18,6 +18,9 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
+using OpenTelemetry.Exporter;
+using OpenTelemetry.Logs;
+using OpenTelemetry.Resources;
 
 namespace Library.Api.Extensions;
 
@@ -105,7 +108,7 @@ public static class ServiceExtension
         services.AddScoped<IBookRepository, BookRepository>();
         services.AddScoped<IRefreshTokenRepository, RefreshTokenRepository>();
         services.AddScoped<IUserBookRepository, UserBookRepository>();
-        
+
         return services;
     }
 
@@ -157,10 +160,7 @@ public static class ServiceExtension
 
     public static IServiceCollection ConfigureRedisCaching(this IServiceCollection services, IConfiguration config)
     {
-        services.AddStackExchangeRedisCache(options =>
-        {
-            options.Configuration = config["Cache:Redis"];
-        });
+        services.AddStackExchangeRedisCache(options => { options.Configuration = config["Cache:Redis"]; });
 
         return services;
     }
@@ -200,10 +200,41 @@ public static class ServiceExtension
 
             x.AddPolicy(AuthConstants.ManagerPolicyName,
                 p => p.RequireAssertion(c =>
-                    c.User.HasClaim(m => m is { Type: AuthConstants.RoleClaimName, Value: AuthConstants.AdminClaimValue }) ||
-                    c.User.HasClaim(m => m is { Type: AuthConstants.RoleClaimName, Value: AuthConstants.ManagerClaimValue })));
+                    c.User.HasClaim(m => m is
+                        { Type: AuthConstants.RoleClaimName, Value: AuthConstants.AdminClaimValue }) ||
+                    c.User.HasClaim(m => m is
+                        { Type: AuthConstants.RoleClaimName, Value: AuthConstants.ManagerClaimValue })));
         });
 
         return services;
+    }
+
+    public static ILoggingBuilder ConfigureLogging(this ILoggingBuilder loggingBuilder, WebApplicationBuilder builder)
+    {
+        var config = builder.Configuration;
+
+        loggingBuilder.ClearProviders();
+        loggingBuilder.AddOpenTelemetry(x =>
+        {
+            x.AddConsoleExporter();
+
+            x.SetResourceBuilder(ResourceBuilder.CreateEmpty()
+                .AddService(config["logging:ServiceName"]!)
+                .AddAttributes(new Dictionary<string, object>
+                {
+                    ["deployment.environment"] = builder.Environment.EnvironmentName
+                }));
+
+            x.IncludeScopes = true;
+            x.IncludeFormattedMessage = true;
+
+            x.AddOtlpExporter(a =>
+            {
+                a.Endpoint = new Uri(config["logging:SeqUri"]!);
+                a.Protocol = OtlpExportProtocol.HttpProtobuf;
+            });
+        });
+
+        return loggingBuilder;
     }
 }

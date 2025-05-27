@@ -53,9 +53,25 @@ services:
     networks:
       - dev_network
 
+  library.seq:
+    image: datalust/seq:latest
+    container_name: library.seq
+    environment:
+      - ACCEPT_EULA=Y
+    ports:
+      - "5341:5341"
+      - "8081:80"
+    depends_on:
+      - library.api
+    volumes:
+      - seq_data:/data
+    networks:
+      - dev_network
+
 networks:
   dev_network:
 
 
 volumes:
   mssql_data:
+  seq_data:
